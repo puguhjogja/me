@@ -1,618 +1,2690 @@
 <!DOCTYPE html>
-<html lang="id" class="light">
+<html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>ProManage ERP - Sistem Manajemen Proyek Terpadu</title>
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            primary: { 50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 900: '#1e3a8a' }
-          }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Manajemen Proyek - Tri Puguh Santoso</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a0ca3;
+            --secondary: #7209b7;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #f8961e;
+            --info: #4895ef;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --bg: #ffffff;
+            --card-bg: #ffffff;
+            --text: #212529;
+            --text-muted: #6c757d;
+            --border: #dee2e6;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+            --radius: 12px;
+            --transition: all 0.3s ease;
         }
-      }
-    }
-  </script>
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    body { font-family: 'Plus Jakarta Sans', sans-serif; }
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-    .dark ::-webkit-scrollbar-thumb { background: #475569; }
-
-    @media print {
-      body * { visibility: hidden; }
-      #printArea, #printArea * { visibility: visible; }
-      #printArea {
-        position: absolute; left: 0; top: 0; width: 100%;
-        background: white !important; color: black !important; padding: 0; margin: 0;
-      }
-      body.print-thermal-58 #printArea { width: 58mm !important; font-size: 10px !important; font-family: monospace !important; }
-      body.print-thermal-80 #printArea { width: 80mm !important; font-size: 11px !important; font-family: monospace !important; }
-      body.print-a4 #printArea { width: 210mm !important; font-size: 12px !important; }
-      .no-print { display: none !important; }
-    }
-  </style>
+        [data-theme="dark"] {
+            --bg: #121212;
+            --card-bg: #1e1e1e;
+            --text: #e0e0e0;
+            --text-muted: #a0a0a0;
+            --border: #333;
+            --shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            transition: var(--transition);
+            overflow-x: hidden;
+        }
+        /* Login Screen */
+        #login-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            padding: 20px;
+        }
+        .login-card {
+            background: var(--card-bg);
+            padding: 40px 30px;
+            border-radius: var(--radius);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            animation: fadeInUp 0.6s ease;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .login-card h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            color: var(--primary);
+        }
+        .login-card p {
+            color: var(--text-muted);
+            margin-bottom: 25px;
+            font-size: 0.9rem;
+        }
+        .login-card input {
+            width: 100%;
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+        .login-card input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            width: 100%;
+        }
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+        }
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+        .btn-sm {
+            padding: 8px 12px;
+            font-size: 0.85rem;
+        }
+        .login-footer {
+            margin-top: 20px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        /* Main App */
+        #app {
+            display: none;
+            min-height: 100vh;
+        }
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: 0; top: 0;
+            width: 260px;
+            height: 100vh;
+            background: var(--card-bg);
+            border-right: 1px solid var(--border);
+            padding: 20px 0;
+            overflow-y: auto;
+            transition: var(--transition);
+            z-index: 1000;
+        }
+        .sidebar-header {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+        .sidebar-header h2 {
+            font-size: 1.2rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: var(--transition);
+            border-left: 3px solid transparent;
+            font-size: 0.95rem;
+        }
+        .nav-item:hover, .nav-item.active {
+            background: rgba(67, 97, 238, 0.1);
+            color: var(--primary);
+            border-left-color: var(--primary);
+        }
+        .nav-item i {
+            width: 20px;
+            text-align: center;
+        }
+        /* Main Content */
+        .main-content {
+            margin-left: 260px;
+            padding: 20px;
+            transition: var(--transition);
+        }
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .topbar h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .theme-toggle {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text);
+            transition: var(--transition);
+        }
+        .theme-toggle:hover {
+            background: var(--primary);
+            color: white;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+        }
+        .user-avatar {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+        /* Content Sections */
+        .content-section {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+        .content-section.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* Cards */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            transition: var(--transition);
+        }
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .card-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+        .card-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        /* Forms */
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 0.95rem;
+            transition: var(--transition);
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+        textarea.form-control {
+            min-height: 80px;
+            resize: vertical;
+        }
+        /* Tables */
+        .table-responsive {
+            overflow-x: auto;
+            border-radius: var(--radius);
+            background: var(--card-bg);
+            box-shadow: var(--shadow);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+        th {
+            background: rgba(67, 97, 238, 0.1);
+            font-weight: 600;
+            color: var(--primary);
+        }
+        tr:hover {
+            background: rgba(67, 97, 238, 0.05);
+        }
+        /* Buttons Group */
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 20px;
+            backdrop-filter: blur(4px);
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 25px;
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            animation: modalIn 0.3s ease;
+        }
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+        .modal-header h3 {
+            font-size: 1.2rem;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: var(--transition);
+        }
+        .modal-close:hover {
+            color: var(--danger);
+        }
+        /* Image Upload */
+        .image-upload {
+            border: 2px dashed var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: 15px;
+        }
+        .image-upload:hover {
+            border-color: var(--primary);
+            background: rgba(67, 97, 238, 0.05);
+        }
+        .image-upload i {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        .image-preview {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 8px;
+            margin-top: 10px;
+            display: none;
+        }
+        /* Signature Canvas */
+        .signature-container {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: white;
+            margin-bottom: 15px;
+        }
+        #signature-canvas {
+            width: 100%;
+            height: 150px;
+            cursor: crosshair;
+            border-radius: 8px;
+        }
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+            overflow-x: auto;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: var(--text-muted);
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 3000;
+            animation: slideIn 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .toast.success { background: #28a745; }
+        .toast.error { background: var(--danger); }
+        .toast.info { background: var(--info); }
+        /* Loading */
+        .loading {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 4000;
+            align-items: center;
+            justify-content: center;
+        }
+        .loading.active {
+            display: flex;
+        }
+        .spinner {
+            width: 50px; height: 50px;
+            border: 5px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        /* Mobile Menu */
+        .menu-toggle {
+            display: none;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            width: 40px; height: 40px;
+            border-radius: 8px;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text);
+            font-size: 1.2rem;
+        }
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-left: 0;
+            }
+            .menu-toggle {
+                display: flex;
+            }
+            .topbar h1 {
+                font-size: 1.2rem;
+            }
+            .card-value {
+                font-size: 1.5rem;
+            }
+            .modal {
+                padding: 20px;
+            }
+        }
+        @media (max-width: 480px) {
+            .topbar-actions .user-info span {
+                display: none;
+            }
+            .card-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        /* Print Styles */
+        @media print {
+            .sidebar, .topbar, .btn, .no-print, .theme-toggle, .menu-toggle {
+                display: none !important;
+            }
+            .main-content {
+                margin-left: 0 !important;
+                padding: 0 !important;
+            }
+            .card {
+                box-shadow: none;
+                border: 1px solid #ddd;
+            }
+            body {
+                background: white;
+                color: black;
+            }
+        }
+        .thermal-print {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            width: 80mm;
+            margin: 0 auto;
+        }
+        .thermal-print table {
+            width: 100%;
+        }
+        .thermal-print th, .thermal-print td {
+            padding: 2px 4px;
+            font-size: 11px;
+        }
+    </style>
 </head>
-<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-200">
-
-  <!-- LOGIN SCREEN -->
-  <div id="loginScreen" class="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-blue-900 via-slate-900 to-slate-950 p-4">
-    <div class="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 p-8">
-      <div class="flex items-center justify-center gap-3 mb-6">
-        <div class="p-3 bg-blue-600 rounded-xl text-white shadow-lg shadow-blue-600/30">
-          <i data-lucide="building-2" class="w-7 h-7"></i>
-        </div>
-        <div>
-          <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white" id="loginAppName">ProManage ERP</h1>
-          <p class="text-xs text-slate-500 dark:text-slate-400">Project & Construction Management</p>
-        </div>
-      </div>
-      <form id="loginForm" class="space-y-4">
-        <div>
-          <label class="block text-sm font-medium mb-1">Username</label>
-          <input type="text" id="loginUsername" value="admin" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-blue-500 outline-none">
-        </div>
-        <div>
-          <label class="block text-sm font-medium mb-1">Password</label>
-          <input type="password" id="loginPassword" value="admin123" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-blue-500 outline-none">
-        </div>
-        <button type="submit" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-600/30 transition flex items-center justify-center gap-2">
-          <i data-lucide="log-in" class="w-4 h-4"></i> Masuk ke Aplikasi
-        </button>
-      </form>
-      <div class="mt-4 text-center text-xs text-slate-400">
-        Default Login: <span class="font-mono text-slate-300">admin</span> / <span class="font-mono text-slate-300">admin123</span>
-      </div>
+<body>
+    <!-- Loading Overlay -->
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
     </div>
-  </div>
 
-  <!-- MAIN APP LAYOUT -->
-  <div id="mainApp" class="hidden min-h-screen flex flex-col md:flex-row">
-    
-    <!-- MOBILE HEADER -->
-    <header class="md:hidden flex items-center justify-between px-4 py-3 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-30">
-      <div class="flex items-center gap-2">
-        <button onclick="toggleSidebar()" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
-          <i data-lucide="menu" class="w-6 h-6"></i>
-        </button>
-        <span class="font-bold text-lg text-blue-600 dark:text-blue-400 headerAppName">ProManage ERP</span>
-      </div>
-      <div class="flex items-center gap-2">
-        <button onclick="syncWithCloud()" title="Sinkronisasi Cloud" class="p-2 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
-          <i data-lucide="cloud-upload" class="w-5 h-5"></i>
-        </button>
-        <button onclick="toggleDarkMode()" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800">
-          <i data-lucide="moon" class="w-5 h-5 dark:hidden"></i>
-          <i data-lucide="sun" class="w-5 h-5 hidden dark:block text-amber-400"></i>
-        </button>
-      </div>
-    </header>
-
-    <!-- SIDEBAR OVERLAY (MOBILE) -->
-    <div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/50 z-30 hidden md:hidden"></div>
-
-    <!-- SIDEBAR (Tanpa Penomoran Angka pada Menu) -->
-    <aside id="sidebar" class="fixed md:sticky top-0 left-0 z-40 h-screen w-72 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col transform -translate-x-full md:translate-x-0 transition-transform duration-200">
-      <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <div class="p-2.5 bg-blue-600 rounded-xl text-white">
-            <i data-lucide="building-2" class="w-6 h-6"></i>
-          </div>
-          <div>
-            <h2 class="font-bold text-lg leading-tight headerAppName">ProManage ERP</h2>
-            <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate max-w-[150px]" id="sidebarCompanyName">PT. Konstruksi Nusantara</p>
-          </div>
-        </div>
-        <button onclick="toggleSidebar()" class="md:hidden p-1 text-slate-400">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-
-      <!-- NAVIGATION MENU -->
-      <nav class="flex-1 overflow-y-auto p-3 space-y-1" id="navMenu">
-        <button data-menu="dashboard" onclick="navigate('dashboard')" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition">
-          <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard
-        </button>
-        <button data-menu="proyek" onclick="navigate('proyek')" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition">
-          <i data-lucide="folder-kanban" class="w-4 h-4"></i> Pengaturan Proyek
-        </button>
-        <button data-menu="rab" onclick="navigate('rab')" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition">
-          <i data-lucide="calculator" class="w-4 h-4"></i> Rencana Anggaran (RAB)
-        </button>
-        <button data-menu="pekerjaan" onclick="navigate('pekerjaan')" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition">
-          <i data-lucide="clipboard-check" class="w-4 h-4"></i> Pekerjaan Proyek
-        </button>
-        <button data-menu="pekerja" onclick="navigate('pekerja')" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition">
-          <i data-lucide="hard-hat" class="w-4 h-4"></i> Pekerja & Absensi
-        </button>
-        <button data-menu="kas" onclick="navigate('kas')" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition">
-          <i data-lucide="wallet" class="w-4 h-4"></i> Arus Kas Proyek
-        </button>
-        <button data-menu="laporan" onclick="navigate('laporan')" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition">
-          <i data-lucide="printer" class="w-4 h-4"></i> Laporan & Cetak
-        </button>
-        <div class="pt-3 pb-1 px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">Administrasi</div>
-        <button data-menu="users" onclick="navigate('users')" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition">
-          <i data-lucide="shield-check" class="w-4 h-4"></i> User & Hak Akses
-        </button>
-        <button data-menu="settings" onclick="navigate('settings')" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition">
-          <i data-lucide="settings" class="w-4 h-4"></i> Pengaturan Sistem
-        </button>
-        <button data-menu="backup" onclick="navigate('backup')" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition">
-          <i data-lucide="database-backup" class="w-4 h-4"></i> Backup & Restore
-        </button>
-      </nav>
-
-      <!-- USER PROFILE FOOTER -->
-      <div class="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2.5">
-            <div class="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm" id="userAvatar">A</div>
-            <div>
-              <p class="text-sm font-semibold leading-none" id="currentUserName">Administrator</p>
-              <p class="text-xs text-slate-500 mt-1" id="currentUserRole">Super Admin</p>
+    <!-- Login Screen -->
+    <div id="login-screen">
+        <div class="login-card">
+            <h1><i class="fas fa-hard-hat"></i> Manajemen Proyek</h1>
+            <p>Sistem Informasi Manajemen Proyek Konstruksi</p>
+            <input type="text" id="login-username" placeholder="Username" autocomplete="username">
+            <input type="password" id="login-password" placeholder="Password" autocomplete="current-password">
+            <button class="btn btn-primary" onclick="handleLogin()">
+                <i class="fas fa-sign-in-alt"></i> Masuk
+            </button>
+            <div class="login-footer">
+                <p>Dibuat Oleh: Tri Puguh Santoso</p>
             </div>
-          </div>
-          <button onclick="logout()" title="Keluar" class="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded-lg">
-            <i data-lucide="log-out" class="w-4 h-4"></i>
-          </button>
         </div>
-      </div>
-    </aside>
+    </div>
 
-    <!-- MAIN CONTENT AREA -->
-    <main class="flex-1 flex flex-col min-w-0">
-      <!-- DESKTOP TOPBAR -->
-      <div class="hidden md:flex items-center justify-between px-8 py-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-20">
-        <div>
-          <h1 class="text-xl font-bold" id="pageTitle">Dashboard</h1>
-          <p class="text-xs text-slate-500 dark:text-slate-400" id="pageSubtitle">Ringkasan operasional & finansial proyek</p>
+    <!-- Main App -->
+    <div id="app">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-hard-hat"></i> Manajemen Proyek</h2>
+            </div>
+            <nav>
+                <div class="nav-item active" data-section="dashboard" onclick="navigateTo('dashboard')">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </div>
+                <div class="nav-item" data-section="projects" onclick="navigateTo('projects')">
+                    <i class="fas fa-project-diagram"></i> Proyek
+                </div>
+                <div class="nav-item" data-section="rab" onclick="navigateTo('rab')">
+                    <i class="fas fa-file-invoice-dollar"></i> RAB
+                </div>
+                <div class="nav-item" data-section="works" onclick="navigateTo('works')">
+                    <i class="fas fa-tasks"></i> Pekerjaan
+                </div>
+                <div class="nav-item" data-section="workers" onclick="navigateTo('workers')">
+                    <i class="fas fa-users"></i> Pekerja & Absensi
+                </div>
+                <div class="nav-item" data-section="cashflow" onclick="navigateTo('cashflow')">
+                    <i class="fas fa-money-bill-wave"></i> Arus Kas
+                </div>
+                <div class="nav-item" data-section="reports" onclick="navigateTo('reports')">
+                    <i class="fas fa-chart-bar"></i> Laporan
+                </div>
+                <div class="nav-item" data-section="users" onclick="navigateTo('users')">
+                    <i class="fas fa-user-shield"></i> Pengguna & Hak Akses
+                </div>
+                <div class="nav-item" data-section="settings" onclick="navigateTo('settings')">
+                    <i class="fas fa-cog"></i> Pengaturan
+                </div>
+                <div class="nav-item" data-section="backup" onclick="navigateTo('backup')">
+                    <i class="fas fa-database"></i> Backup/Restore
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Topbar -->
+            <div class="topbar">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <button class="menu-toggle" onclick="toggleSidebar()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 id="page-title">Dashboard</h1>
+                </div>
+                <div class="topbar-actions">
+                    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Theme">
+                        <i class="fas fa-moon" id="theme-icon"></i>
+                    </button>
+                    <div class="user-info">
+                        <div class="user-avatar" id="user-avatar">A</div>
+                        <span id="user-name">Admin</span>
+                    </div>
+                    <button class="btn btn-danger btn-sm" onclick="handleLogout()" title="Logout">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dashboard Section -->
+            <section class="content-section active" id="section-dashboard">
+                <div class="card-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">Total Proyek</span>
+                            <i class="fas fa-project-diagram" style="color: var(--primary); font-size: 1.5rem;"></i>
+                        </div>
+                        <div class="card-value" id="stat-projects">0</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">Total Pekerja</span>
+                            <i class="fas fa-users" style="color: var(--success); font-size: 1.5rem;"></i>
+                        </div>
+                        <div class="card-value" id="stat-workers">0</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">Total Pemasukan</span>
+                            <i class="fas fa-arrow-down" style="color: var(--success); font-size: 1.5rem;"></i>
+                        </div>
+                        <div class="card-value" id="stat-income" style="font-size: 1.3rem;">Rp 0</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">Total Pengeluaran</span>
+                            <i class="fas fa-arrow-up" style="color: var(--danger); font-size: 1.5rem;"></i>
+                        </div>
+                        <div class="card-value" id="stat-expense" style="font-size: 1.3rem; color: var(--danger);">Rp 0</div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Grafik Arus Kas</h3>
+                    </div>
+                    <canvas id="cashflow-chart" height="100"></canvas>
+                </div>
+            </section>
+
+            <!-- Projects Section -->
+            <section class="content-section" id="section-projects">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+                    <h2>Daftar Proyek</h2>
+                    <button class="btn btn-primary" onclick="openProjectModal()">
+                        <i class="fas fa-plus"></i> Tambah Proyek
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table id="projects-table">
+                        <thead>
+                            <tr>
+                                <th>Nama Proyek</th>
+                                <th>Jenis</th>
+                                <th>Lokasi</th>
+                                <th>Anggaran</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="projects-tbody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- RAB Section -->
+            <section class="content-section" id="section-rab">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+                    <h2>Rencana Anggaran Belanja (RAB)</h2>
+                    <button class="btn btn-primary" onclick="openRabModal()">
+                        <i class="fas fa-plus"></i> Buat RAB
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table id="rab-table">
+                        <thead>
+                            <tr>
+                                <th>Proyek</th>
+                                <th>Tanggal</th>
+                                <th>Total Anggaran</th>
+                                <th>Manager</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rab-tbody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Works Section -->
+            <section class="content-section" id="section-works">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+                    <h2>Pekerjaan Berdasarkan Proyek</h2>
+                    <button class="btn btn-primary" onclick="openWorkModal()">
+                        <i class="fas fa-plus"></i> Tambah Pekerjaan
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table id="works-table">
+                        <thead>
+                            <tr>
+                                <th>Proyek</th>
+                                <th>Nama Pekerjaan</th>
+                                <th>Volume</th>
+                                <th>Satuan</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="works-tbody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Workers Section -->
+            <section class="content-section" id="section-workers">
+                <div class="tabs">
+                    <button class="tab active" onclick="switchWorkerTab('workers-list')">Daftar Pekerja</button>
+                    <button class="tab" onclick="switchWorkerTab('attendance')">Absensi</button>
+                </div>
+                <div id="workers-list-tab">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+                        <h2>Daftar Pekerja</h2>
+                        <button class="btn btn-primary" onclick="openWorkerModal()">
+                            <i class="fas fa-plus"></i> Tambah Pekerja
+                        </button>
+                    </div>
+                    <div class="table-responsive">
+                        <table id="workers-table">
+                            <thead>
+                                <tr>
+                                    <th>Nama</th>
+                                    <th>Proyek</th>
+                                    <th>Jabatan</th>
+                                    <th>No. HP</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="workers-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div id="attendance-tab" style="display: none;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+                        <h2>Absensi Pekerja</h2>
+                        <button class="btn btn-primary" onclick="openAttendanceModal()">
+                            <i class="fas fa-plus"></i> Catat Absensi
+                        </button>
+                    </div>
+                    <div class="table-responsive">
+                        <table id="attendance-table">
+                            <thead>
+                                <tr>
+                                    <th>Tanggal</th>
+                                    <th>Pekerja</th>
+                                    <th>Proyek</th>
+                                    <th>Status</th>
+                                    <th>Keterangan</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="attendance-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Cashflow Section -->
+            <section class="content-section" id="section-cashflow">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+                    <h2>Arus Kas Proyek</h2>
+                    <button class="btn btn-primary" onclick="openCashflowModal()">
+                        <i class="fas fa-plus"></i> Tambah Transaksi
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table id="cashflow-table">
+                        <thead>
+                            <tr>
+                                <th>Tanggal</th>
+                                <th>Proyek</th>
+                                <th>Jenis</th>
+                                <th>Keterangan</th>
+                                <th>Jumlah</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cashflow-tbody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Reports Section -->
+            <section class="content-section" id="section-reports">
+                <h2>Laporan Proyek</h2>
+                <div class="card" style="margin-top: 20px;">
+                    <div class="form-group">
+                        <label>Pilih Proyek</label>
+                        <select class="form-control" id="report-project-select" onchange="generateReport()">
+                            <option value="">-- Pilih Proyek --</option>
+                        </select>
+                    </div>
+                    <div class="btn-group" style="margin-top: 15px;">
+                        <button class="btn btn-primary" onclick="printReport('normal')">
+                            <i class="fas fa-print"></i> Print
+                        </button>
+                        <button class="btn btn-secondary" onclick="printReport('pdf')">
+                            <i class="fas fa-file-pdf"></i> PDF
+                        </button>
+                        <button class="btn btn-warning" onclick="printReport('thermal')">
+                            <i class="fas fa-receipt"></i> Thermal
+                        </button>
+                    </div>
+                    <div id="report-content" style="margin-top: 20px;"></div>
+                </div>
+            </section>
+
+            <!-- Users Section -->
+            <section class="content-section" id="section-users">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+                    <h2>Pengguna & Hak Akses</h2>
+                    <button class="btn btn-primary" onclick="openUserModal()">
+                        <i class="fas fa-plus"></i> Tambah Pengguna
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table id="users-table">
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Nama</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-tbody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Settings Section -->
+            <section class="content-section" id="section-settings">
+                <div class="tabs">
+                    <button class="tab active" onclick="switchSettingsTab('company')">Perusahaan</button>
+                    <button class="tab" onclick="switchSettingsTab('app')">Aplikasi</button>
+                    <button class="tab" onclick="switchSettingsTab('system')">Sistem</button>
+                </div>
+                <div id="company-settings-tab">
+                    <div class="card">
+                        <h3 style="margin-bottom: 20px;">Pengaturan Perusahaan</h3>
+                        <div class="form-group">
+                            <label>Nama Perusahaan</label>
+                            <input type="text" class="form-control" id="set-company-name" value="PT. Konstruksi Jaya">
+                        </div>
+                        <div class="form-group">
+                            <label>Alamat</label>
+                            <textarea class="form-control" id="set-company-address">Jl. Raya No. 123, Jakarta</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Telepon</label>
+                            <input type="text" class="form-control" id="set-company-phone" value="021-1234567">
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" class="form-control" id="set-company-email" value="info@konstruksi.com">
+                        </div>
+                        <button class="btn btn-primary" onclick="saveCompanySettings()">
+                            <i class="fas fa-save"></i> Simpan
+                        </button>
+                    </div>
+                </div>
+                <div id="app-settings-tab" style="display: none;">
+                    <div class="card">
+                        <h3 style="margin-bottom: 20px;">Pengaturan Aplikasi</h3>
+                        <div class="form-group">
+                            <label>Nama Aplikasi</label>
+                            <input type="text" class="form-control" id="set-app-name" value="Manajemen Proyek">
+                        </div>
+                        <div class="form-group">
+                            <label>Mata Uang</label>
+                            <select class="form-control" id="set-app-currency">
+                                <option value="IDR">IDR (Rupiah)</option>
+                                <option value="USD">USD (Dollar)</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary" onclick="saveAppSettings()">
+                            <i class="fas fa-save"></i> Simpan
+                        </button>
+                    </div>
+                </div>
+                <div id="system-settings-tab" style="display: none;">
+                    <div class="card">
+                        <h3 style="margin-bottom: 20px;">Pengaturan Sistem</h3>
+                        <div class="form-group">
+                            <label>Google Apps Script URL (Sinkronisasi Data)</label>
+                            <input type="text" class="form-control" id="set-system-url" placeholder="https://script.google.com/macros/s/.../exec">
+                            <small style="color: var(--text-muted);">URL Web App untuk sinkronisasi data ke Google Sheets</small>
+                        </div>
+                        <button class="btn btn-primary" onclick="saveSystemSettings()">
+                            <i class="fas fa-save"></i> Simpan
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Backup/Restore Section -->
+            <section class="content-section" id="section-backup">
+                <h2>Backup & Restore Data</h2>
+                <div class="card-grid" style="margin-top: 20px;">
+                    <div class="card">
+                        <h3 style="margin-bottom: 15px;"><i class="fas fa-download"></i> Backup Data</h3>
+                        <p style="color: var(--text-muted); margin-bottom: 15px;">Unduh semua data aplikasi dalam format JSON.</p>
+                        <button class="btn btn-success" onclick="backupData()">
+                            <i class="fas fa-download"></i> Backup Sekarang
+                        </button>
+                    </div>
+                    <div class="card">
+                        <h3 style="margin-bottom: 15px;"><i class="fas fa-upload"></i> Restore Data</h3>
+                        <p style="color: var(--text-muted); margin-bottom: 15px;">Pulihkan data dari file backup JSON.</p>
+                        <input type="file" id="restore-file" accept=".json" style="display: none;" onchange="restoreData(event)">
+                        <button class="btn btn-warning" onclick="document.getElementById('restore-file').click()">
+                            <i class="fas fa-upload"></i> Pilih File Backup
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <!-- Project Modal -->
+    <div class="modal-overlay" id="project-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="project-modal-title">Tambah Proyek</h3>
+                <button class="modal-close" onclick="closeModal('project-modal')">&times;</button>
+            </div>
+            <form id="project-form" onsubmit="saveProject(event)">
+                <input type="hidden" id="project-id">
+                <div class="form-group">
+                    <label>Nama Proyek</label>
+                    <input type="text" class="form-control" id="project-name" required>
+                </div>
+                <div class="form-group">
+                    <label>Jenis Proyek</label>
+                    <select class="form-control" id="project-type" required>
+                        <option value="">-- Pilih Jenis --</option>
+                        <option value="Gedung">Gedung</option>
+                        <option value="Jalan">Jalan</option>
+                        <option value="Jembatan">Jembatan</option>
+                        <option value="Rumah">Rumah</option>
+                        <option value="Renovasi">Renovasi</option>
+                        <option value="Lainnya">Lainnya</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Lokasi</label>
+                    <input type="text" class="form-control" id="project-location" required>
+                </div>
+                <div class="form-group">
+                    <label>Anggaran (Rp)</label>
+                    <input type="number" class="form-control" id="project-budget" required>
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select class="form-control" id="project-status">
+                        <option value="Perencanaan">Perencanaan</option>
+                        <option value="Berjalan">Berjalan</option>
+                        <option value="Selesai">Selesai</option>
+                        <option value="Ditunda">Ditunda</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Foto Before</label>
+                    <div class="image-upload" onclick="document.getElementById('project-photo-before').click()">
+                        <i class="fas fa-camera"></i>
+                        <p>Klik untuk upload foto before</p>
+                        <img id="preview-before" class="image-preview" alt="Preview">
+                    </div>
+                    <input type="file" id="project-photo-before" accept="image/*" capture="environment" style="display: none;" onchange="previewImage(this, 'preview-before')">
+                </div>
+                <div class="form-group">
+                    <label>Foto After</label>
+                    <div class="image-upload" onclick="document.getElementById('project-photo-after').click()">
+                        <i class="fas fa-camera"></i>
+                        <p>Klik untuk upload foto after</p>
+                        <img id="preview-after" class="image-preview" alt="Preview">
+                    </div>
+                    <input type="file" id="project-photo-after" accept="image/*" capture="environment" style="display: none;" onchange="previewImage(this, 'preview-after')">
+                </div>
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Simpan</button>
+                    <button type="button" class="btn btn-danger" onclick="closeModal('project-modal')">Batal</button>
+                </div>
+            </form>
         </div>
-        <div class="flex items-center gap-3">
-          <span id="cloudStatusBadge" class="text-xs px-3 py-1.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 font-medium">
-            Mode Lokal
-          </span>
-          <button onclick="syncWithCloud()" class="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-xl shadow-sm transition">
-            <i data-lucide="refresh-cw" class="w-4 h-4"></i> Sinkron Cloud
-          </button>
-          <button onclick="toggleDarkMode()" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
-            <i data-lucide="moon" class="w-4 h-4 dark:hidden"></i>
-            <i data-lucide="sun" class="w-4 h-4 hidden dark:block text-amber-400"></i>
-          </button>
+    </div>
+
+    <!-- RAB Modal -->
+    <div class="modal-overlay" id="rab-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="rab-modal-title">Buat RAB</h3>
+                <button class="modal-close" onclick="closeModal('rab-modal')">&times;</button>
+            </div>
+            <form id="rab-form" onsubmit="saveRab(event)">
+                <input type="hidden" id="rab-id">
+                <div class="form-group">
+                    <label>Proyek</label>
+                    <select class="form-control" id="rab-project" required onchange="loadRabItems()">
+                        <option value="">-- Pilih Proyek --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Tanggal</label>
+                    <input type="date" class="form-control" id="rab-date" required>
+                </div>
+                <div class="form-group">
+                    <label>Manager Proyek</label>
+                    <input type="text" class="form-control" id="rab-manager" required>
+                </div>
+                <div class="form-group">
+                    <label>Tanda Tangan Manager</label>
+                    <div class="signature-container">
+                        <canvas id="signature-canvas"></canvas>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-danger" onclick="clearSignature()">
+                        <i class="fas fa-eraser"></i> Hapus Tanda Tangan
+                    </button>
+                </div>
+                <div class="form-group">
+                    <label>Item RAB</label>
+                    <div id="rab-items-container">
+                        <div class="rab-item" style="display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap;">
+                            <input type="text" class="form-control" placeholder="Nama Item" style="flex: 2;" data-rab-item="name">
+                            <input type="number" class="form-control" placeholder="Qty" style="flex: 1;" data-rab-item="qty">
+                            <input type="number" class="form-control" placeholder="Harga" style="flex: 1;" data-rab-item="price">
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="addRabItem()">
+                        <i class="fas fa-plus"></i> Tambah Item
+                    </button>
+                </div>
+                <div class="btn-group" style="margin-top: 20px;">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Simpan</button>
+                    <button type="button" class="btn btn-danger" onclick="closeModal('rab-modal')">Batal</button>
+                </div>
+            </form>
         </div>
-      </div>
+    </div>
 
-      <!-- DYNAMIC CONTENT CONTAINER -->
-      <div id="contentArea" class="p-4 md:p-8 flex-1 max-w-7xl w-full mx-auto"></div>
-    </main>
-  </div>
+    <!-- Work Modal -->
+    <div class="modal-overlay" id="work-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="work-modal-title">Tambah Pekerjaan</h3>
+                <button class="modal-close" onclick="closeModal('work-modal')">&times;</button>
+            </div>
+            <form id="work-form" onsubmit="saveWork(event)">
+                <input type="hidden" id="work-id">
+                <div class="form-group">
+                    <label>Proyek</label>
+                    <select class="form-control" id="work-project" required>
+                        <option value="">-- Pilih Proyek --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Nama Pekerjaan</label>
+                    <input type="text" class="form-control" id="work-name" required>
+                </div>
+                <div class="form-group">
+                    <label>Volume</label>
+                    <input type="number" class="form-control" id="work-volume" required>
+                </div>
+                <div class="form-group">
+                    <label>Satuan</label>
+                    <input type="text" class="form-control" id="work-unit" required>
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select class="form-control" id="work-status">
+                        <option value="Belum Mulai">Belum Mulai</option>
+                        <option value="Proses">Proses</option>
+                        <option value="Selesai">Selesai</option>
+                    </select>
+                </div>
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Simpan</button>
+                    <button type="button" class="btn btn-danger" onclick="closeModal('work-modal')">Batal</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-  <!-- HIDDEN PRINT AREA -->
-  <div id="printArea" class="hidden"></div>
+    <!-- Worker Modal -->
+    <div class="modal-overlay" id="worker-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="worker-modal-title">Tambah Pekerja</h3>
+                <button class="modal-close" onclick="closeModal('worker-modal')">&times;</button>
+            </div>
+            <form id="worker-form" onsubmit="saveWorker(event)">
+                <input type="hidden" id="worker-id">
+                <div class="form-group">
+                    <label>Nama</label>
+                    <input type="text" class="form-control" id="worker-name" required>
+                </div>
+                <div class="form-group">
+                    <label>Proyek</label>
+                    <select class="form-control" id="worker-project" required>
+                        <option value="">-- Pilih Proyek --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Jabatan</label>
+                    <input type="text" class="form-control" id="worker-position" required>
+                </div>
+                <div class="form-group">
+                    <label>No. HP</label>
+                    <input type="text" class="form-control" id="worker-phone">
+                </div>
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Simpan</button>
+                    <button type="button" class="btn btn-danger" onclick="closeModal('worker-modal')">Batal</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-  <!-- TOAST NOTIFICATION -->
-  <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-5 py-3 rounded-xl shadow-xl font-medium text-sm flex items-center gap-2">
-    <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 dark:text-emerald-600"></i>
-    <span id="toastMsg">Berhasil disimpan</span>
-  </div>
+    <!-- Attendance Modal -->
+    <div class="modal-overlay" id="attendance-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="attendance-modal-title">Catat Absensi</h3>
+                <button class="modal-close" onclick="closeModal('attendance-modal')">&times;</button>
+            </div>
+            <form id="attendance-form" onsubmit="saveAttendance(event)">
+                <input type="hidden" id="attendance-id">
+                <div class="form-group">
+                    <label>Tanggal</label>
+                    <input type="date" class="form-control" id="attendance-date" required>
+                </div>
+                <div class="form-group">
+                    <label>Pekerja</label>
+                    <select class="form-control" id="attendance-worker" required>
+                        <option value="">-- Pilih Pekerja --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Proyek</label>
+                    <select class="form-control" id="attendance-project" required>
+                        <option value="">-- Pilih Proyek --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select class="form-control" id="attendance-status">
+                        <option value="Hadir">Hadir</option>
+                        <option value="Izin">Izin</option>
+                        <option value="Sakit">Sakit</option>
+                        <option value="Alpha">Alpha</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Keterangan</label>
+                    <textarea class="form-control" id="attendance-note"></textarea>
+                </div>
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Simpan</button>
+                    <button type="button" class="btn btn-danger" onclick="closeModal('attendance-modal')">Batal</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-<script>
-const DEFAULT_DB = {
-  projects: [
-    {
-      id: "PRJ-001", nama: "Pembangunan Gedung Kantor 3 Lantai", jenis: "Konstruksi Gedung",
-      lokasi: "Semarang, Jawa Tengah", klien: "PT. Maju Bersama", status: "Berjalan",
-      tanggalMulai: "2026-10-01", tanggalSelesai: "2027-03-30", fotoBefore: "", fotoAfter: ""
-    }
-  ],
-  rab: [
-    {
-      id: "RAB-001", projectId: "PRJ-001", jenisProyek: "Konstruksi Gedung", kode: "A.01",
-      uraian: "Pekerjaan Pondasi & Galian Tanah", volume: 120, satuan: "m3", hargaSatuan: 450000,
-      total: 54000000, managerName: "Ir. Budi Santoso, MT", signatureData: ""
-    }
-  ],
-  tasks: [
-    {
-      id: "TSK-001", projectId: "PRJ-001", judul: "Pengecoran Sloof & Kolom Lantai 1",
-      deskripsi: "Menggunakan beton mutu K-300", pic: "Mandor Joko", deadline: "2026-11-25", progress: 75, status: "Proses"
-    }
-  ],
-  workers: [
-    { id: "WRK-001", projectId: "PRJ-001", nama: "Joko Susilo", jabatan: "Mandor", upahHarian: 200000, telepon: "08123456789", status: "Aktif" },
-    { id: "WRK-002", projectId: "PRJ-001", nama: "Slamet Riyadi", jabatan: "Tukang Batu", upahHarian: 150000, telepon: "08198765432", status: "Aktif" }
-  ],
-  attendance: [
-    { id: "ATT-001", projectId: "PRJ-001", workerId: "WRK-001", workerName: "Joko Susilo", tanggal: "2026-11-17", status: "Hadir", lemburJam: 2, catatan: "Lembur cor" }
-  ],
-  cashflow: [
-    { id: "KAS-001", projectId: "PRJ-001", tanggal: "2026-11-01", jenis: "Masuk", kategori: "Termin 1", keterangan: "Pembayaran DP Proyek 30%", nominal: 150000000, metode: "Transfer Bank" },
-    { id: "KAS-002", projectId: "PRJ-001", tanggal: "2026-11-05", jenis: "Keluar", kategori: "Material", keterangan: "Pembelian Besi Beton & Semen", nominal: 42500000, metode: "Transfer Bank" }
-  ],
-  users: [
-    {
-      id: "USR-001", nama: "Administrator Utama", username: "admin", password: "admin123", role: "Super Admin",
-      hakAkses: ["dashboard", "proyek", "rab", "pekerjaan", "pekerja", "kas", "laporan", "users", "settings", "backup"],
-      status: "Aktif"
-    },
-    {
-      id: "USR-002", nama: "Budi Santoso", username: "manager", password: "123", role: "Project Manager",
-      hakAkses: ["dashboard", "proyek", "rab", "pekerjaan", "pekerja", "kas", "laporan"],
-      status: "Aktif"
-    }
-  ],
-  settings: {
-    companyName: "PT. Konstruksi Nusantara Jaya",
-    companyAddress: "Jl. Pemuda No. 118, Semarang, Jawa Tengah",
-    companyPhone: "024-3551234 | admin@nusantarajaya.co.id",
-    appName: "ProManage ERP",
-    gasUrl: "",
-    currency: "Rp"
-  }
-};
+    <!-- Cashflow Modal -->
+    <div class="modal-overlay" id="cashflow-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="cashflow-modal-title">Tambah Transaksi</h3>
+                <button class="modal-close" onclick="closeModal('cashflow-modal')">&times;</button>
+            </div>
+            <form id="cashflow-form" onsubmit="saveCashflow(event)">
+                <input type="hidden" id="cashflow-id">
+                <div class="form-group">
+                    <label>Tanggal</label>
+                    <input type="date" class="form-control" id="cashflow-date" required>
+                </div>
+                <div class="form-group">
+                    <label>Proyek</label>
+                    <select class="form-control" id="cashflow-project" required>
+                        <option value="">-- Pilih Proyek --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Jenis</label>
+                    <select class="form-control" id="cashflow-type" required>
+                        <option value="Pemasukan">Pemasukan</option>
+                        <option value="Pengeluaran">Pengeluaran</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Keterangan</label>
+                    <input type="text" class="form-control" id="cashflow-desc" required>
+                </div>
+                <div class="form-group">
+                    <label>Jumlah (Rp)</label>
+                    <input type="number" class="form-control" id="cashflow-amount" required>
+                </div>
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Simpan</button>
+                    <button type="button" class="btn btn-danger" onclick="closeModal('cashflow-modal')">Batal</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-let DB = JSON.parse(localStorage.getItem("promanage_db")) || DEFAULT_DB;
-let currentUser = JSON.parse(sessionStorage.getItem("promanage_user")) || null;
-let currentMenu = "dashboard";
-let signaturePadCanvas = null, signaturePadCtx = null, isDrawing = false;
+    <!-- User Modal -->
+    <div class="modal-overlay" id="user-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="user-modal-title">Tambah Pengguna</h3>
+                <button class="modal-close" onclick="closeModal('user-modal')">&times;</button>
+            </div>
+            <form id="user-form" onsubmit="saveUser(event)">
+                <input type="hidden" id="user-id">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" class="form-control" id="user-username" required>
+                </div>
+                <div class="form-group">
+                    <label>Nama Lengkap</label>
+                    <input type="text" class="form-control" id="user-fullname" required>
+                </div>
+                <div class="form-group">
+                    <label>Password (kosongkan jika tidak diubah)</label>
+                    <input type="password" class="form-control" id="user-password">
+                </div>
+                <div class="form-group">
+                    <label>Role</label>
+                    <select class="form-control" id="user-role">
+                        <option value="admin">Admin</option>
+                        <option value="manager">Manager</option>
+                        <option value="staff">Staff</option>
+                    </select>
+                </div>
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Simpan</button>
+                    <button type="button" class="btn btn-danger" onclick="closeModal('user-modal')">Batal</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-function saveDB() {
-  localStorage.setItem("promanage_db", JSON.stringify(DB));
-  applyBranding();
-}
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
 
-function showToast(msg) {
-  const t = document.getElementById("toast");
-  document.getElementById("toastMsg").innerText = msg;
-  t.classList.remove("translate-y-20", "opacity-0");
-  setTimeout(() => t.classList.add("translate-y-20", "opacity-0"), 3000);
-}
+    <script>
+        // ============================================================
+        // KONFIGURASI WEB APP URL (TANAM DI SINI UNTUK SINKRONISASI)
+        // ============================================================
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxrCA4B1A0i32qM5zfHlWJlw0_Q7tdmYPDPgUuHYQQnuPLOxMGF9gIn3x-xdGdNNU_I/exec';
 
-function formatRupiah(num) {
-  return (DB.settings.currency || "Rp") + " " + Number(num || 0).toLocaleString("id-ID");
-}
+        // ============================================================
+        // STATE APLIKASI
+        // ============================================================
+        let state = {
+            currentUser: null,
+            currentSection: 'dashboard',
+            theme: localStorage.getItem('theme') || 'light',
+            data: {
+                projects: [],
+                rab: [],
+                works: [],
+                workers: [],
+                attendance: [],
+                cashflow: [],
+                users: [],
+                settings: {
+                    company: { name: 'PT. Konstruksi Jaya', address: 'Jl. Raya No. 123, Jakarta', phone: '021-1234567', email: 'info@konstruksi.com' },
+                    app: { name: 'Manajemen Proyek', currency: 'IDR' },
+                    system: { url: WEB_APP_URL }
+                }
+            }
+        };
 
-function generateId(prefix) {
-  return prefix + "-" + Math.floor(1000 + Math.random() * 9000);
-}
+        let signatureCanvas, signatureCtx, isDrawing = false;
+        let cashflowChart = null;
 
-function compressImage(file, maxWidth = 800, quality = 0.7) {
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = (event) => {
-      const img = new Image();
-      img.src = event.target.result;
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        let width = img.width;
-        let height = img.height;
-        if (width > maxWidth) {
-          height = Math.round((height * maxWidth) / width);
-          width = maxWidth;
+        // ============================================================
+        // INITIALIZATION
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', () => {
+            initTheme();
+            initSignature();
+            initDefaultData();
+            checkAuth();
+        });
+
+        function initTheme() {
+            document.documentElement.setAttribute('data-theme', state.theme);
+            const icon = document.getElementById('theme-icon');
+            if (icon) {
+                icon.className = state.theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            }
         }
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, width, height);
-        resolve(canvas.toDataURL("image/jpeg", quality));
-      };
-    };
-  });
-}
 
-async function syncWithCloud() {
-  const url = DB.settings.gasUrl;
-  if (!url) {
-    showToast("URL Google Apps Script belum diatur di Pengaturan Sistem!");
-    return;
-  }
-  showToast("Menyinkronkan data dengan Cloud...");
-  try {
-    const settingsArray = Object.entries(DB.settings).map(([key, value]) => ({ key, value }));
-    const payload = {
-      action: "syncAll",
-      data: { ...DB, settings: settingsArray }
-    };
-    const res = await fetch(url, { method: "POST", body: JSON.stringify(payload) });
-    const json = await res.json();
-    if (json.status === "success") {
-      showToast("Sinkronisasi Cloud Berhasil!");
-      document.getElementById("cloudStatusBadge").innerText = "Cloud Terhubung";
-      document.getElementById("cloudStatusBadge").className = "text-xs px-3 py-1.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300 font-medium";
-    } else {
-      showToast("Gagal sinkron: " + json.message);
-    }
-  } catch (err) {
-    showToast("Error koneksi ke Apps Script.");
-  }
-}
+        function toggleTheme() {
+            state.theme = state.theme === 'light' ? 'dark' : 'light';
+            localStorage.setItem('theme', state.theme);
+            initTheme();
+        }
 
-async function pullFromCloud() {
-  const url = DB.settings.gasUrl;
-  if (!url) return showToast("Isi URL Web App Apps Script terlebih dahulu.");
-  showToast("Mengambil data dari Google Sheets...");
-  try {
-    const res = await fetch(url + "?action=getAll");
-    const json = await res.json();
-    if (json.status === "success" && json.data) {
-      const d = json.data;
-      if (d.projects?.length) DB.projects = d.projects;
-      if (d.rab?.length) DB.rab = d.rab;
-      if (d.tasks?.length) DB.tasks = d.tasks;
-      if (d.workers?.length) DB.workers = d.workers;
-      if (d.attendance?.length) DB.attendance = d.attendance;
-      if (d.cashflow?.length) DB.cashflow = d.cashflow;
-      if (d.users?.length) DB.users = d.users;
-      if (d.settings?.length) {
-        d.settings.forEach(s => { if (s.key !== "gasUrl") DB.settings[s.key] = s.value; });
-      }
-      saveDB();
-      navigate(currentMenu);
-      showToast("Data berhasil dimuat dari Cloud!");
-    }
-  } catch (e) {
-    showToast("Gagal mengambil data dari Cloud.");
-  }
-}
+        function initSignature() {
+            signatureCanvas = document.getElementById('signature-canvas');
+            if (!signatureCanvas) return;
+            signatureCanvas.width = signatureCanvas.offsetWidth;
+            signatureCanvas.height = signatureCanvas.offsetHeight;
+            signatureCtx = signatureCanvas.getContext('2d');
+            signatureCtx.strokeStyle = '#000';
+            signatureCtx.lineWidth = 2;
+            signatureCtx.lineCap = 'round';
 
-document.getElementById("loginForm").addEventListener("submit", (e) => {
-  e.preventDefault();
-  const u = document.getElementById("loginUsername").value.trim();
-  const p = document.getElementById("loginPassword").value.trim();
-  const found = DB.users.find(x => x.username === u && x.password === p && x.status === "Aktif");
-  if (found) {
-    currentUser = found;
-    sessionStorage.setItem("promanage_user", JSON.stringify(found));
-    initApp();
-  } else {
-    alert("Username atau password salah / akun nonaktif!");
-  }
-});
+            signatureCanvas.addEventListener('mousedown', startDrawing);
+            signatureCanvas.addEventListener('mousemove', draw);
+            signatureCanvas.addEventListener('mouseup', stopDrawing);
+            signatureCanvas.addEventListener('mouseout', stopDrawing);
+            signatureCanvas.addEventListener('touchstart', handleTouchStart);
+            signatureCanvas.addEventListener('touchmove', handleTouchMove);
+            signatureCanvas.addEventListener('touchend', stopDrawing);
+        }
 
-function logout() {
-  sessionStorage.removeItem("promanage_user");
-  currentUser = null;
-  document.getElementById("mainApp").classList.add("hidden");
-  document.getElementById("loginScreen").classList.remove("hidden");
-}
+        function startDrawing(e) {
+            isDrawing = true;
+            const rect = signatureCanvas.getBoundingClientRect();
+            signatureCtx.beginPath();
+            signatureCtx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+        }
 
-function toggleDarkMode() {
-  document.documentElement.classList.toggle("dark");
-  localStorage.setItem("promanage_theme", document.documentElement.classList.contains("dark") ? "dark" : "light");
-}
+        function draw(e) {
+            if (!isDrawing) return;
+            const rect = signatureCanvas.getBoundingClientRect();
+            signatureCtx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+            signatureCtx.stroke();
+        }
 
-function toggleSidebar() {
-  document.getElementById("sidebar").classList.toggle("-translate-x-full");
-  document.getElementById("sidebarOverlay").classList.toggle("hidden");
-}
+        function stopDrawing() {
+            isDrawing = false;
+        }
 
-function applyBranding() {
-  document.querySelectorAll(".headerAppName").forEach(el => el.innerText = DB.settings.appName);
-  document.getElementById("loginAppName").innerText = DB.settings.appName;
-  document.getElementById("sidebarCompanyName").innerText = DB.settings.companyName;
-  if (DB.settings.gasUrl) {
-    document.getElementById("cloudStatusBadge").innerText = "Cloud Siap";
-    document.getElementById("cloudStatusBadge").className = "text-xs px-3 py-1.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300 font-medium";
-  }
-}
+        function handleTouchStart(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const rect = signatureCanvas.getBoundingClientRect();
+            isDrawing = true;
+            signatureCtx.beginPath();
+            signatureCtx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
+        }
 
-function initApp() {
-  if (localStorage.getItem("promanage_theme") === "dark") {
-    document.documentElement.classList.add("dark");
-  }
-  applyBranding();
-  if (!currentUser) return;
+        function handleTouchMove(e) {
+            e.preventDefault();
+            if (!isDrawing) return;
+            const touch = e.touches[0];
+            const rect = signatureCanvas.getBoundingClientRect();
+            signatureCtx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
+            signatureCtx.stroke();
+        }
 
-  document.getElementById("loginScreen").classList.add("hidden");
-  document.getElementById("mainApp").classList.remove("hidden");
-  document.getElementById("currentUserName").innerText = currentUser.nama;
-  document.getElementById("currentUserRole").innerText = currentUser.role;
-  document.getElementById("userAvatar").innerText = currentUser.nama.charAt(0).toUpperCase();
+        function clearSignature() {
+            if (signatureCtx && signatureCanvas) {
+                signatureCtx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height);
+            }
+        }
 
-  document.querySelectorAll(".nav-item").forEach(btn => {
-    const menuKey = btn.getAttribute("data-menu");
-    if (menuKey === "dashboard" || currentUser.hakAkses.includes(menuKey)) {
-      btn.classList.remove("hidden");
-    } else {
-      btn.classList.add("hidden");
-    }
-  });
+        // ============================================================
+        // DEFAULT DATA & STORAGE
+        // ============================================================
+        function initDefaultData() {
+            const stored = localStorage.getItem('app_data');
+            if (stored) {
+                try {
+                    state.data = JSON.parse(stored);
+                } catch (e) {
+                    console.error('Error parsing stored data:', e);
+                }
+            }
 
-  navigate("dashboard");
-  lucide.createIcons();
-}
+            // Pastikan data users ada
+            if (!state.data.users || state.data.users.length === 0) {
+                state.data.users = [
+                    { id: '1', username: 'admin', password: '418899', fullname: 'Administrator', role: 'admin', status: 'Aktif' }
+                ];
+            }
 
-function navigate(menu) {
-  currentMenu = menu;
-  document.querySelectorAll(".nav-item").forEach(btn => {
-    if (btn.getAttribute("data-menu") === menu) {
-      btn.classList.add("bg-blue-600", "text-white", "shadow-md", "shadow-blue-600/20");
-      btn.classList.remove("text-slate-600", "dark:text-slate-300", "hover:bg-slate-100", "dark:hover:bg-slate-800");
-    } else {
-      btn.classList.remove("bg-blue-600", "text-white", "shadow-md", "shadow-blue-600/20");
-      btn.classList.add("text-slate-600", "dark:text-slate-300", "hover:bg-slate-100", "dark:hover:bg-slate-800");
-    }
-  });
+            // Pastikan settings ada
+            if (!state.data.settings) {
+                state.data.settings = {
+                    company: { name: 'PT. Konstruksi Jaya', address: 'Jl. Raya No. 123, Jakarta', phone: '021-1234567', email: 'info@konstruksi.com' },
+                    app: { name: 'Manajemen Proyek', currency: 'IDR' },
+                    system: { url: WEB_APP_URL }
+                };
+            }
 
-  if (window.innerWidth < 768) {
-    document.getElementById("sidebar").classList.add("-translate-x-full");
-    document.getElementById("sidebarOverlay").classList.add("hidden");
-  }
+            saveData();
+        }
 
-  const area = document.getElementById("contentArea");
-  const titles = {
-    dashboard: ["Dashboard Utama", "Ringkasan proyek, RAB, absensi, dan arus kas"],
-    proyek: ["Pengaturan Proyek", "Kelola daftar proyek beserta dokumentasi foto Before & After"],
-    rab: ["Rencana Anggaran Belanja (RAB)", "Penyusunan RAB per jenis proyek & tanda tangan digital manajer"],
-    pekerjaan: ["Pekerjaan Proyek", "Monitoring progres item pekerjaan & jadwal lapangan"],
-    pekerja: ["Pekerja & Absensi Proyek", "Database tenaga kerja, upah harian, dan rekap kehadiran"],
-    kas: ["Arus Kas Proyek", "Pencatatan pemasukan termin & pengeluaran operasional proyek"],
-    laporan: ["Laporan Proyek & Cetak", "Cetak laporan format A4 PDF atau Struk Printer Thermal (58mm/80mm)"],
-    users: ["Administrator User & Hak Akses", "Manajemen akun pengguna dan otorisasi modul"],
-    settings: ["Pengaturan Sistem & Perusahaan", "Identitas perusahaan, nama aplikasi, dan koneksi Google Apps Script"],
-    backup: ["Backup & Restore Data", "Ekspor cadangan database JSON atau pulihkan data"]
-  };
+        function saveData() {
+            localStorage.setItem('app_data', JSON.stringify(state.data));
+            // Sinkronisasi ke Google Sheets jika URL tersedia
+            if (state.data.settings.system.url && state.data.settings.system.url !== 'https://script.google.com/macros/s/GANTI_DENGAN_URL_WEB_APP_ANDA/exec') {
+                syncToSheets();
+            }
+        }
 
-  document.getElementById("pageTitle").innerText = titles[menu][0];
-  document.getElementById("pageSubtitle").innerText = titles[menu][1];
+        async function syncToSheets() {
+            try {
+                const url = state.data.settings.system.url;
+                await fetch(url, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'sync', data: state.data })
+                });
+            } catch (e) {
+                console.log('Sync error (offline mode):', e.message);
+            }
+        }
 
-  switch (menu) {
-    case "dashboard": renderDashboard(area); break;
-    case "proyek": renderProyek(area); break;
-    case "rab": renderRAB(area); break;
-    case "pekerjaan": renderPekerjaan(area); break;
-    case "pekerja": renderPekerja(area); break;
-    case "kas": renderKas(area); break;
-    case "laporan": renderLaporan(area); break;
-    case "users": renderUsers(area); break;
-    case "settings": renderSettings(area); break;
-    case "backup": renderBackup(area); break;
-  }
-  lucide.createIcons();
-}
+        // ============================================================
+        // AUTH
+        // ============================================================
+        function checkAuth() {
+            const session = localStorage.getItem('current_user');
+            if (session) {
+                try {
+                    state.currentUser = JSON.parse(session);
+                    showApp();
+                } catch (e) {
+                    showLogin();
+                }
+            } else {
+                showLogin();
+            }
+        }
 
-function renderDashboard(area) {
-  const totalProyek = DB.projects.length;
-  const totalRAB = DB.rab.reduce((acc, r) => acc + Number(r.total || 0), 0);
-  const kasMasuk = DB.cashflow.filter(c => c.jenis === "Masuk").reduce((a, b) => a + Number(b.nominal), 0);
-  const kasKeluar = DB.cashflow.filter(c => c.jenis === "Keluar").reduce((a, b) => a + Number(b.nominal), 0);
-  const saldoKas = kasMasuk - kasKeluar;
+        function handleLogin() {
+            const username = document.getElementById('login-username').value.trim();
+            const password = document.getElementById('login-password').value;
 
-  area.innerHTML = `
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-      <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-        <div class="flex items-center justify-between mb-3">
-          <span class="text-sm text-slate-500">Total Proyek</span>
-          <div class="p-2.5 bg-blue-100 dark:bg-blue-900/40 text-blue-600 rounded-xl"><i data-lucide="folder-kanban" class="w-5 h-5"></i></div>
-        </div>
-        <div class="text-2xl font-bold">${totalProyek} Proyek</div>
-        <div class="text-xs text-emerald-500 mt-1">${DB.projects.filter(p => p.status === 'Berjalan').length} Sedang Berjalan</div>
-      </div>
-      <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-        <div class="flex items-center justify-between mb-3">
-          <span class="text-sm text-slate-500">Total Nilai RAB</span>
-          <div class="p-2.5 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 rounded-xl"><i data-lucide="calculator" class="w-5 h-5"></i></div>
-        </div>
-        <div class="text-2xl font-bold">${formatRupiah(totalRAB)}</div>
-        <div class="text-xs text-slate-400 mt-1">${DB.rab.length} Item Anggaran</div>
-      </div>
-      <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-        <div class="flex items-center justify-between mb-3">
-          <span class="text-sm text-slate-500">Saldo Kas Proyek</span>
-          <div class="p-2.5 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 rounded-xl"><i data-lucide="wallet" class="w-5 h-5"></i></div>
-        </div>
-        <div class="text-2xl font-bold ${saldoKas < 0 ? 'text-rose-500' : 'text-emerald-600 dark:text-emerald-400'}">${formatRupiah(saldoKas)}</div>
-        <div class="text-xs text-slate-400 mt-1">Masuk: ${formatRupiah(kasMasuk)}</div>
-      </div>
-      <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-        <div class="flex items-center justify-between mb-3">
-          <span class="text-sm text-slate-500">Tenaga Kerja Aktif</span>
-          <div class="p-2.5 bg-amber-100 dark:bg-amber-900/40 text-amber-600 rounded-xl"><i data-lucide="hard-hat" class="w-5 h-5"></i></div>
-        </div>
-        <div class="text-2xl font-bold">${DB.workers.length} Orang</div>
-        <div class="text-xs text-slate-400 mt-1">${DB.tasks.length} Paket Pekerjaan</div>
-      </div>
-    </div>
+            if (!username || !password) {
+                showToast('Username dan password harus diisi!', 'error');
+                return;
+            }
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800">
-        <h3 class="font-bold text-base mb-4">Progres Pekerjaan Terkini</h3>
-        <div class="space-y-4">
-          ${DB.tasks.map(t => {
-            const prj = DB.projects.find(p => p.id === t.projectId)?.nama || "-";
-            return `
-              <div>
-                <div class="flex justify-between text-sm mb-1">
-                  <span class="font-medium">${t.judul} <span class="text-xs text-slate-400">(${prj})</span></span>
-                  <span class="font-bold text-blue-600">${t.progress}%</span>
+            const user = state.data.users.find(u => u.username === username && u.password === password);
+            if (user) {
+                if (user.status === 'Nonaktif') {
+                    showToast('Akun Anda dinonaktifkan. Hubungi administrator.', 'error');
+                    return;
+                }
+                state.currentUser = user;
+                localStorage.setItem('current_user', JSON.stringify(user));
+                showApp();
+                showToast(`Selamat datang, ${user.fullname}!`, 'success');
+            } else {
+                showToast('Username atau password salah!', 'error');
+            }
+        }
+
+        function handleLogout() {
+            if (confirm('Yakin ingin logout?')) {
+                state.currentUser = null;
+                localStorage.removeItem('current_user');
+                showLogin();
+                showToast('Anda telah logout.', 'info');
+            }
+        }
+
+        function showLogin() {
+            document.getElementById('login-screen').style.display = 'flex';
+            document.getElementById('app').style.display = 'none';
+            document.getElementById('login-username').value = '';
+            document.getElementById('login-password').value = '';
+        }
+
+        function showApp() {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('app').style.display = 'block';
+            document.getElementById('user-name').textContent = state.currentUser.fullname;
+            document.getElementById('user-avatar').textContent = state.currentUser.fullname.charAt(0).toUpperCase();
+            loadAllData();
+            navigateTo('dashboard');
+        }
+
+        // ============================================================
+        // NAVIGATION
+        // ============================================================
+        function navigateTo(section) {
+            state.currentSection = section;
+            document.querySelectorAll('.content-section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+
+            const sectionEl = document.getElementById(`section-${section}`);
+            if (sectionEl) sectionEl.classList.add('active');
+
+            const navItem = document.querySelector(`.nav-item[data-section="${section}"]`);
+            if (navItem) navItem.classList.add('active');
+
+            const titles = {
+                dashboard: 'Dashboard',
+                projects: 'Manajemen Proyek',
+                rab: 'Rencana Anggaran Belanja',
+                works: 'Pekerjaan',
+                workers: 'Pekerja & Absensi',
+                cashflow: 'Arus Kas',
+                reports: 'Laporan',
+                users: 'Pengguna & Hak Akses',
+                settings: 'Pengaturan',
+                backup: 'Backup/Restore'
+            };
+            document.getElementById('page-title').textContent = titles[section] || 'Dashboard';
+
+            // Close sidebar on mobile
+            document.getElementById('sidebar').classList.remove('active');
+
+            // Load section data
+            loadSectionData(section);
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+        }
+
+        // ============================================================
+        // DATA LOADING & RENDERING
+        // ============================================================
+        function loadAllData() {
+            loadProjects();
+            loadRab();
+            loadWorks();
+            loadWorkers();
+            loadAttendance();
+            loadCashflow();
+            loadUsers();
+            loadSettings();
+            updateDashboard();
+            populateProjectSelects();
+            populateWorkerSelects();
+        }
+
+        function loadSectionData(section) {
+            switch (section) {
+                case 'dashboard': updateDashboard(); break;
+                case 'projects': loadProjects(); break;
+                case 'rab': loadRab(); break;
+                case 'works': loadWorks(); break;
+                case 'workers': loadWorkers(); loadAttendance(); break;
+                case 'cashflow': loadCashflow(); break;
+                case 'reports': populateReportSelect(); break;
+                case 'users': loadUsers(); break;
+                case 'settings': loadSettings(); break;
+            }
+        }
+
+        function loadProjects() {
+            const tbody = document.getElementById('projects-tbody');
+            if (!tbody) return;
+            if (state.data.projects.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color: var(--text-muted);">Belum ada proyek</td></tr>';
+                return;
+            }
+            tbody.innerHTML = state.data.projects.map(p => `
+                <tr>
+                    <td>${p.name}</td>
+                    <td>${p.type}</td>
+                    <td>${p.location}</td>
+                    <td>Rp ${formatNumber(p.budget)}</td>
+                    <td><span style="padding: 3px 8px; border-radius: 12px; font-size: 0.8rem; background: ${getStatusColor(p.status)}20; color: ${getStatusColor(p.status)};">${p.status}</span></td>
+                    <td>
+                        <div class="btn-group">
+                            <button class="btn btn-sm btn-warning" onclick="editProject('${p.id}')"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteProject('${p.id}')"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function loadRab() {
+            const tbody = document.getElementById('rab-tbody');
+            if (!tbody) return;
+            if (state.data.rab.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--text-muted);">Belum ada RAB</td></tr>';
+                return;
+            }
+            tbody.innerHTML = state.data.rab.map(r => {
+                const project = state.data.projects.find(p => p.id === r.projectId);
+                const total = r.items ? r.items.reduce((sum, i) => sum + (i.qty * i.price), 0) : 0;
+                return `
+                    <tr>
+                        <td>${project ? project.name : '-'}</td>
+                        <td>${formatDate(r.date)}</td>
+                        <td>Rp ${formatNumber(total)}</td>
+                        <td>${r.manager}</td>
+                        <td>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-info" onclick="printRab('${r.id}')"><i class="fas fa-print"></i></button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteRab('${r.id}')"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function loadWorks() {
+            const tbody = document.getElementById('works-tbody');
+            if (!tbody) return;
+            if (state.data.works.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color: var(--text-muted);">Belum ada pekerjaan</td></tr>';
+                return;
+            }
+            tbody.innerHTML = state.data.works.map(w => {
+                const project = state.data.projects.find(p => p.id === w.projectId);
+                return `
+                    <tr>
+                        <td>${project ? project.name : '-'}</td>
+                        <td>${w.name}</td>
+                        <td>${w.volume}</td>
+                        <td>${w.unit}</td>
+                        <td><span style="padding: 3px 8px; border-radius: 12px; font-size: 0.8rem; background: ${getStatusColor(w.status)}20; color: ${getStatusColor(w.status)};">${w.status}</span></td>
+                        <td>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-warning" onclick="editWork('${w.id}')"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteWork('${w.id}')"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function loadWorkers() {
+            const tbody = document.getElementById('workers-tbody');
+            if (!tbody) return;
+            if (state.data.workers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--text-muted);">Belum ada pekerja</td></tr>';
+                return;
+            }
+            tbody.innerHTML = state.data.workers.map(w => {
+                const project = state.data.projects.find(p => p.id === w.projectId);
+                return `
+                    <tr>
+                        <td>${w.name}</td>
+                        <td>${project ? project.name : '-'}</td>
+                        <td>${w.position}</td>
+                        <td>${w.phone || '-'}</td>
+                        <td>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-warning" onclick="editWorker('${w.id}')"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteWorker('${w.id}')"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function loadAttendance() {
+            const tbody = document.getElementById('attendance-tbody');
+            if (!tbody) return;
+            if (state.data.attendance.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color: var(--text-muted);">Belum ada data absensi</td></tr>';
+                return;
+            }
+            tbody.innerHTML = state.data.attendance.map(a => {
+                const worker = state.data.workers.find(w => w.id === a.workerId);
+                const project = state.data.projects.find(p => p.id === a.projectId);
+                return `
+                    <tr>
+                        <td>${formatDate(a.date)}</td>
+                        <td>${worker ? worker.name : '-'}</td>
+                        <td>${project ? project.name : '-'}</td>
+                        <td><span style="padding: 3px 8px; border-radius: 12px; font-size: 0.8rem; background: ${a.status === 'Hadir' ? '#28a74520' : a.status === 'Izin' ? '#f8961e20' : '#f7258520'}; color: ${a.status === 'Hadir' ? '#28a745' : a.status === 'Izin' ? '#f8961e' : '#f72585'};">${a.status}</span></td>
+                        <td>${a.note || '-'}</td>
+                        <td>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-warning" onclick="editAttendance('${a.id}')"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteAttendance('${a.id}')"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function loadCashflow() {
+            const tbody = document.getElementById('cashflow-tbody');
+            if (!tbody) return;
+            if (state.data.cashflow.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color: var(--text-muted);">Belum ada transaksi</td></tr>';
+                return;
+            }
+            tbody.innerHTML = state.data.cashflow.map(c => {
+                const project = state.data.projects.find(p => p.id === c.projectId);
+                return `
+                    <tr>
+                        <td>${formatDate(c.date)}</td>
+                        <td>${project ? project.name : '-'}</td>
+                        <td><span style="color: ${c.type === 'Pemasukan' ? '#28a745' : '#f72585'}; font-weight: 600;">${c.type}</span></td>
+                        <td>${c.desc}</td>
+                        <td style="color: ${c.type === 'Pemasukan' ? '#28a745' : '#f72585'}; font-weight: 600;">Rp ${formatNumber(c.amount)}</td>
+                        <td>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-warning" onclick="editCashflow('${c.id}')"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteCashflow('${c.id}')"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function loadUsers() {
+            const tbody = document.getElementById('users-tbody');
+            if (!tbody) return;
+            tbody.innerHTML = state.data.users.map(u => `
+                <tr>
+                    <td>${u.username}</td>
+                    <td>${u.fullname}</td>
+                    <td><span style="padding: 3px 8px; border-radius: 12px; font-size: 0.8rem; background: ${u.role === 'admin' ? '#4361ee20' : u.role === 'manager' ? '#7209b720' : '#4cc9f020'}; color: ${u.role === 'admin' ? '#4361ee' : u.role === 'manager' ? '#7209b7' : '#4cc9f0'};">${u.role}</span></td>
+                    <td>${u.status}</td>
+                    <td>
+                        <div class="btn-group">
+                            <button class="btn btn-sm btn-warning" onclick="editUser('${u.id}')"><i class="fas fa-edit"></i></button>
+                            ${u.username !== 'admin' ? `<button class="btn btn-sm btn-danger" onclick="deleteUser('${u.id}')"><i class="fas fa-trash"></i></button>` : ''}
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function loadSettings() {
+            const s = state.data.settings;
+            document.getElementById('set-company-name').value = s.company.name;
+            document.getElementById('set-company-address').value = s.company.address;
+            document.getElementById('set-company-phone').value = s.company.phone;
+            document.getElementById('set-company-email').value = s.company.email;
+            document.getElementById('set-app-name').value = s.app.name;
+            document.getElementById('set-app-currency').value = s.app.currency;
+            document.getElementById('set-system-url').value = s.system.url;
+        }
+
+        function updateDashboard() {
+            document.getElementById('stat-projects').textContent = state.data.projects.length;
+            document.getElementById('stat-workers').textContent = state.data.workers.length;
+
+            const totalIncome = state.data.cashflow.filter(c => c.type === 'Pemasukan').reduce((sum, c) => sum + c.amount, 0);
+            const totalExpense = state.data.cashflow.filter(c => c.type === 'Pengeluaran').reduce((sum, c) => sum + c.amount, 0);
+
+            document.getElementById('stat-income').textContent = 'Rp ' + formatNumber(totalIncome);
+            document.getElementById('stat-expense').textContent = 'Rp ' + formatNumber(totalExpense);
+
+            // Update chart
+            const ctx = document.getElementById('cashflow-chart');
+            if (ctx) {
+                if (cashflowChart) cashflowChart.destroy();
+                const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+                const incomeData = new Array(12).fill(0);
+                const expenseData = new Array(12).fill(0);
+
+                state.data.cashflow.forEach(c => {
+                    const month = new Date(c.date).getMonth();
+                    if (c.type === 'Pemasukan') incomeData[month] += c.amount;
+                    else expenseData[month] += c.amount;
+                });
+
+                cashflowChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: months,
+                        datasets: [
+                            { label: 'Pemasukan', data: incomeData, backgroundColor: '#4cc9f0', borderRadius: 6 },
+                            { label: 'Pengeluaran', data: expenseData, backgroundColor: '#f72585', borderRadius: 6 }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { labels: { color: getComputedStyle(document.documentElement).getPropertyValue('--text') } }
+                        },
+                        scales: {
+                            y: { ticks: { color: getComputedStyle(document.documentElement).getPropertyValue('--text-muted') }, grid: { color: 'rgba(0,0,0,0.05)' } },
+                            x: { ticks: { color: getComputedStyle(document.documentElement).getPropertyValue('--text-muted') }, grid: { display: false } }
+                        }
+                    }
+                });
+            }
+        }
+
+        // ============================================================
+        // HELPER FUNCTIONS
+        // ============================================================
+        function formatNumber(num) {
+            return new Intl.NumberFormat('id-ID').format(num || 0);
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const d = new Date(dateStr);
+            return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
+
+        function getStatusColor(status) {
+            const colors = {
+                'Perencanaan': '#4361ee',
+                'Berjalan': '#f8961e',
+                'Selesai': '#28a745',
+                'Ditunda': '#f72585',
+                'Belum Mulai': '#6c757d',
+                'Proses': '#f8961e',
+                'Hadir': '#28a745',
+                'Izin': '#f8961e',
+                'Sakit': '#f72585',
+                'Alpha': '#dc3545'
+            };
+            return colors[status] || '#6c757d';
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i> ${message}`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.animation = 'slideIn 0.3s ease reverse';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function showLoading(show = true) {
+            document.getElementById('loading').classList.toggle('active', show);
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        function previewImage(input, previewId) {
+            const preview = document.getElementById(previewId);
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function populateProjectSelects() {
+            const selects = ['rab-project', 'work-project', 'worker-project', 'attendance-project', 'cashflow-project'];
+            selects.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                const currentVal = el.value;
+                el.innerHTML = '<option value="">-- Pilih Proyek --</option>' +
+                    state.data.projects.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+                el.value = currentVal;
+            });
+        }
+
+        function populateWorkerSelects() {
+            const el = document.getElementById('attendance-worker');
+            if (!el) return;
+            el.innerHTML = '<option value="">-- Pilih Pekerja --</option>' +
+                state.data.workers.map(w => `<option value="${w.id}">${w.name}</option>`).join('');
+        }
+
+        function populateReportSelect() {
+            const el = document.getElementById('report-project-select');
+            if (!el) return;
+            el.innerHTML = '<option value="">-- Pilih Proyek --</option>' +
+                state.data.projects.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+        }
+
+        // ============================================================
+        // CRUD PROJECTS
+        // ============================================================
+        function openProjectModal(editId = null) {
+            document.getElementById('project-form').reset();
+            document.getElementById('project-id').value = '';
+            document.getElementById('project-modal-title').textContent = editId ? 'Edit Proyek' : 'Tambah Proyek';
+            document.getElementById('preview-before').style.display = 'none';
+            document.getElementById('preview-after').style.display = 'none';
+
+            if (editId) {
+                const p = state.data.projects.find(x => x.id === editId);
+                if (p) {
+                    document.getElementById('project-id').value = p.id;
+                    document.getElementById('project-name').value = p.name;
+                    document.getElementById('project-type').value = p.type;
+                    document.getElementById('project-location').value = p.location;
+                    document.getElementById('project-budget').value = p.budget;
+                    document.getElementById('project-status').value = p.status;
+                    if (p.photoBefore) {
+                        document.getElementById('preview-before').src = p.photoBefore;
+                        document.getElementById('preview-before').style.display = 'block';
+                    }
+                    if (p.photoAfter) {
+                        document.getElementById('preview-after').src = p.photoAfter;
+                        document.getElementById('preview-after').style.display = 'block';
+                    }
+                }
+            }
+            document.getElementById('project-modal').classList.add('active');
+        }
+
+        function editProject(id) { openProjectModal(id); }
+
+        function saveProject(e) {
+            e.preventDefault();
+            const id = document.getElementById('project-id').value;
+            const photoBeforeEl = document.getElementById('preview-before');
+            const photoAfterEl = document.getElementById('preview-after');
+
+            const projectData = {
+                id: id || Date.now().toString(),
+                name: document.getElementById('project-name').value,
+                type: document.getElementById('project-type').value,
+                location: document.getElementById('project-location').value,
+                budget: parseFloat(document.getElementById('project-budget').value) || 0,
+                status: document.getElementById('project-status').value,
+                photoBefore: photoBeforeEl.style.display !== 'none' ? photoBeforeEl.src : '',
+                photoAfter: photoAfterEl.style.display !== 'none' ? photoAfterEl.src : ''
+            };
+
+            if (id) {
+                const idx = state.data.projects.findIndex(p => p.id === id);
+                if (idx !== -1) state.data.projects[idx] = projectData;
+            } else {
+                state.data.projects.push(projectData);
+            }
+
+            saveData();
+            closeModal('project-modal');
+            loadProjects();
+            populateProjectSelects();
+            updateDashboard();
+            showToast(id ? 'Proyek berhasil diupdate!' : 'Proyek berhasil ditambahkan!', 'success');
+        }
+
+        function deleteProject(id) {
+            if (!confirm('Yakin ingin menghapus proyek ini?')) return;
+            state.data.projects = state.data.projects.filter(p => p.id !== id);
+            saveData();
+            loadProjects();
+            populateProjectSelects();
+            updateDashboard();
+            showToast('Proyek berhasil dihapus.', 'success');
+        }
+
+        // ============================================================
+        // CRUD RAB
+        // ============================================================
+        function openRabModal() {
+            document.getElementById('rab-form').reset();
+            document.getElementById('rab-id').value = '';
+            document.getElementById('rab-date').value = new Date().toISOString().split('T')[0];
+            document.getElementById('rab-items-container').innerHTML = `
+                <div class="rab-item" style="display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap;">
+                    <input type="text" class="form-control" placeholder="Nama Item" style="flex: 2;" data-rab-item="name">
+                    <input type="number" class="form-control" placeholder="Qty" style="flex: 1;" data-rab-item="qty">
+                    <input type="number" class="form-control" placeholder="Harga" style="flex: 1;" data-rab-item="price">
                 </div>
-                <div class="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-2.5">
-                  <div class="bg-blue-600 h-2.5 rounded-full" style="width: ${t.progress}%"></div>
-                </div>
-              </div>
             `;
-          }).join("") || '<p class="text-sm text-slate-400">Belum ada data pekerjaan.</p>'}
-        </div>
-      </div>
+            clearSignature();
+            document.getElementById('rab-modal').classList.add('active');
+        }
 
-      <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800">
-        <h3 class="font-bold text-base mb-4">Transaksi Arus Kas Terakhir</h3>
-        <div class="space-y-3">
-          ${DB.cashflow.slice(-5).reverse().map(c => `
-            <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60">
-              <div>
-                <p class="text-sm font-semibold">${c.keterangan}</p>
-                <p class="text-xs text-slate-400">${c.tanggal} • ${c.kategori}</p>
-              </div>
-              <span class="text-sm font-bold ${c.jenis === 'Masuk' ? 'text-emerald-600' : 'text-rose-500'}">
-                ${c.jenis === 'Masuk' ? '+' : '-'} ${formatRupiah(c.nominal)}
-              </span>
-            </div>
-          `).join("")}
-        </div>
-      </div>
-    </div>
-  `;
-}
+        function addRabItem() {
+            const container = document.getElementById('rab-items-container');
+            const div = document.createElement('div');
+            div.className = 'rab-item';
+            div.style.cssText = 'display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap;';
+            div.innerHTML = `
+                <input type="text" class="form-control" placeholder="Nama Item" style="flex: 2;" data-rab-item="name">
+                <input type="number" class="form-control" placeholder="Qty" style="flex: 1;" data-rab-item="qty">
+                <input type="number" class="form-control" placeholder="Harga" style="flex: 1;" data-rab-item="price">
+                <button type="button" class="btn btn-sm btn-danger" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>
+            `;
+            container.appendChild(div);
+        }
 
-let tempBeforeImg = "", tempAfterImg = "";
+        function saveRab(e) {
+            e.preventDefault();
+            const items = [];
+            document.querySelectorAll('#rab-items-container .rab-item').forEach(el => {
+                const name = el.querySelector('[data-rab-item="name"]').value;
+                const qty = parseFloat(el.querySelector('[data-rab-item="qty"]').value) || 0;
+                const price = parseFloat(el.querySelector('[data-rab-item="price"]').value) || 0;
+                if (name) items.push({ name, qty, price });
+            });
 
-function renderProyek(area) {
-  tempBeforeImg = ""; tempAfterImg = "";
-  area.innerHTML = `
-    <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 mb-6">
-      <h3 class="font-bold text-base mb-4">Tambah / Edit Data Proyek & Foto Before-After</h3>
-      <form id="formProyek" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <input type="hidden" id="prjId">
-        <div>
-          <label class="block text-xs font-semibold mb-1">Nama Proyek *</label>
-          <input type="text" id="prjNama" required placeholder="Contoh: Renovasi Ruko Blok A" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold mb-1">Jenis Proyek *</label>
-          <select id="prjJenis" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
-            <option>Konstruksi Gedung</option>
-            <option>Renovasi & Interior</option>
-            <option>Infrastruktur Jalan & Jembatan</option>
-            <option>Mekanikal & Elektrikal (MEP)</option>
-            <option>IT & Jaringan</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-xs font-semibold mb-1">Nama Klien / Pemilik</label>
-          <input type="text" id="prjKlien" placeholder="Nama Klien" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold mb-1">Lokasi Proyek</label>
-          <input type="text" id="prjLokasi" placeholder="Alamat lengkap" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold mb-1">Tanggal Mulai</label>
-          <input type="date" id="prjMulai" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold mb-1">Status Proyek</label>
-          <select id="prjStatus" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
-            <option>Perencanaan</option>
-            <option>Berjalan</option>
-            <option>Selesai</option>
-            <option>Ditunda</option>
-          </select>
-        </div>
-        <div class="md:col-span-1 border border-dashed border-slate-300 dark:border-slate-700 p-4 rounded-xl">
-          <label class="block text-xs font-bold mb-2 text-blue-600">📷 Foto BEFORE (Kondisi Awal)</label>
-          <input type="file" accept="image/*" capture="environment" onchange="handleProjectPhoto(this, 'before')" class="text-xs w-full mb-2">
-          <img id="previewBefore" class="hidden w-full h-36 object-cover rounded-lg border">
-        </div>
-        <div class="md:col-span-1 border border-dashed border-slate-300 dark:border-slate-7
+            const rabData = {
+                id: Date.now().toString(),
+                projectId: document.getElementById('rab-project').value,
+                date: document.getElementById('rab-date').value,
+                manager: document.getElementById('rab-manager').value,
+                signature: signatureCanvas.toDataURL(),
+                items: items
+            };
+
+            state.data.rab.push(rabData);
+            saveData();
+            closeModal('rab-modal');
+            loadRab();
+            showToast('RAB berhasil disimpan!', 'success');
+        }
+
+        function deleteRab(id) {
+            if (!confirm('Yakin ingin menghapus RAB ini?')) return;
+            state.data.rab = state.data.rab.filter(r => r.id !== id);
+            saveData();
+            loadRab();
+            showToast('RAB berhasil dihapus.', 'success');
+        }
+
+        function printRab(id) {
+            const r = state.data.rab.find(x => x.id === id);
+            if (!r) return;
+            const project = state.data.projects.find(p => p.id === r.projectId);
+            const total = r.items.reduce((sum, i) => sum + (i.qty * i.price), 0);
+            const company = state.data.settings.company;
+
+            const win = window.open('', '_blank');
+            win.document.write(`
+                <html><head><title>RAB - ${project ? project.name : ''}</title>
+                <style>
+                    body { font-family: Arial, sans-serif; padding: 20px; }
+                    h1 { font-size: 18px; text-align: center; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 12px; }
+                    th { background: #f0f0f0; }
+                    .signature { margin-top: 30px; text-align: right; }
+                    .signature img { max-width: 150px; border: 1px solid #ddd; }
+                    @media print { .no-print { display: none; } }
+                </style></head><body>
+                <h1>RENCANA ANGGARAN BELANJA (RAB)</h1>
+                <p><strong>${company.name}</strong><br>${company.address}<br>${company.phone}</p>
+                <hr>
+                <p><strong>Proyek:</strong> ${project ? project.name : '-'}<br>
+                <strong>Lokasi:</strong> ${project ? project.location : '-'}<br>
+                <strong>Tanggal:</strong> ${formatDate(r.date)}<br>
+                <strong>Manager:</strong> ${r.manager}</p>
+                <table>
+                    <thead><tr><th>No</th><th>Item</th><th>Qty</th><th>Harga</th><th>Total</th></tr></thead>
+                    <tbody>
+                        ${r.items.map((item, i) => `<tr><td>${i+1}</td><td>${item.name}</td><td>${item.qty}</td><td>Rp ${formatNumber(item.price)}</td><td>Rp ${formatNumber(item.qty * item.price)}</td></tr>`).join('')}
+                    </tbody>
+                    <tfoot><tr><th colspan="4">Total</th><th>Rp ${formatNumber(total)}</th></tr></tfoot>
+                </table>
+                <div class="signature">
+                    <p>Manager Proyek</p>
+                    <img src="${r.signature}" alt="Signature">
+                    <p><strong>${r.manager}</strong></p>
+                </div>
+                <button class="no-print" onclick="window.print()" style="margin-top:20px; padding:10px 20px; cursor:pointer;">Cetak</button>
+                </body></html>
+            `);
+            win.document.close();
+        }
+
+        // ============================================================
+        // CRUD WORKS
+        // ============================================================
+        function openWorkModal(editId = null) {
+            document.getElementById('work-form').reset();
+            document.getElementById('work-id').value = '';
+            document.getElementById('work-modal-title').textContent = editId ? 'Edit Pekerjaan' : 'Tambah Pekerjaan';
+
+            if (editId) {
+                const w = state.data.works.find(x => x.id === editId);
+                if (w) {
+                    document.getElementById('work-id').value = w.id;
+                    document.getElementById('work-project').value = w.projectId;
+                    document.getElementById('work-name').value = w.name;
+                    document.getElementById('work-volume').value = w.volume;
+                    document.getElementById('work-unit').value = w.unit;
+                    document.getElementById('work-status').value = w.status;
+                }
+            }
+            document.getElementById('work-modal').classList.add('active');
+        }
+
+        function editWork(id) { openWorkModal(id); }
+
+        function saveWork(e) {
+            e.preventDefault();
+            const id = document.getElementById('work-id').value;
+            const workData = {
+                id: id || Date.now().toString(),
+                projectId: document.getElementById('work-project').value,
+                name: document.getElementById('work-name').value,
+                volume: parseFloat(document.getElementById('work-volume').value) || 0,
+                unit: document.getElementById('work-unit').value,
+                status: document.getElementById('work-status').value
+            };
+
+            if (id) {
+                const idx = state.data.works.findIndex(w => w.id === id);
+                if (idx !== -1) state.data.works[idx] = workData;
+            } else {
+                state.data.works.push(workData);
+            }
+
+            saveData();
+            closeModal('work-modal');
+            loadWorks();
+            showToast(id ? 'Pekerjaan diupdate!' : 'Pekerjaan ditambahkan!', 'success');
+        }
+
+        function deleteWork(id) {
+            if (!confirm('Yakin ingin menghapus pekerjaan ini?')) return;
+            state.data.works = state.data.works.filter(w => w.id !== id);
+            saveData();
+            loadWorks();
+            showToast('Pekerjaan dihapus.', 'success');
+        }
+
+        // ============================================================
+        // CRUD WORKERS
+        // ============================================================
+        function openWorkerModal(editId = null) {
+            document.getElementById('worker-form').reset();
+            document.getElementById('worker-id').value = '';
+            document.getElementById('worker-modal-title').textContent = editId ? 'Edit Pekerja' : 'Tambah Pekerja';
+
+            if (editId) {
+                const w = state.data.workers.find(x => x.id === editId);
+                if (w) {
+                    document.getElementById('worker-id').value = w.id;
+                    document.getElementById('worker-name').value = w.name;
+                    document.getElementById('worker-project').value = w.projectId;
+                    document.getElementById('worker-position').value = w.position;
+                    document.getElementById('worker-phone').value = w.phone || '';
+                }
+            }
+            document.getElementById('worker-modal').classList.add('active');
+        }
+
+        function editWorker(id) { openWorkerModal(id); }
+
+        function saveWorker(e) {
+            e.preventDefault();
+            const id = document.getElementById('worker-id').value;
+            const workerData = {
+                id: id || Date.now().toString(),
+                name: document.getElementById('worker-name').value,
+                projectId: document.getElementById('worker-project').value,
+                position: document.getElementById('worker-position').value,
+                phone: document.getElementById('worker-phone').value
+            };
+
+            if (id) {
+                const idx = state.data.workers.findIndex(w => w.id === id);
+                if (idx !== -1) state.data.workers[idx] = workerData;
+            } else {
+                state.data.workers.push(workerData);
+            }
+
+            saveData();
+            closeModal('worker-modal');
+            loadWorkers();
+            populateWorkerSelects();
+            updateDashboard();
+            showToast(id ? 'Pekerja diupdate!' : 'Pekerja ditambahkan!', 'success');
+        }
+
+        function deleteWorker(id) {
+            if (!confirm('Yakin ingin menghapus pekerja ini?')) return;
+            state.data.workers = state.data.workers.filter(w => w.id !== id);
+            saveData();
+            loadWorkers();
+            populateWorkerSelects();
+            updateDashboard();
+            showToast('Pekerja dihapus.', 'success');
+        }
+
+        // ============================================================
+        // CRUD ATTENDANCE
+        // ============================================================
+        function openAttendanceModal(editId = null) {
+            document.getElementById('attendance-form').reset();
+            document.getElementById('attendance-id').value = '';
+            document.getElementById('attendance-date').value = new Date().toISOString().split('T')[0];
+            document.getElementById('attendance-modal-title').textContent = editId ? 'Edit Absensi' : 'Catat Absensi';
+
+            if (editId) {
+                const a = state.data.attendance.find(x => x.id === editId);
+                if (a) {
+                    document.getElementById('attendance-id').value = a.id;
+                    document.getElementById('attendance-date').value = a.date;
+                    document.getElementById('attendance-worker').value = a.workerId;
+                    document.getElementById('attendance-project').value = a.projectId;
+                    document.getElementById('attendance-status').value = a.status;
+                    document.getElementById('attendance-note').value = a.note || '';
+                }
+            }
+            document.getElementById('attendance-modal').classList.add('active');
+        }
+
+        function editAttendance(id) { openAttendanceModal(id); }
+
+        function saveAttendance(e) {
+            e.preventDefault();
+            const id = document.getElementById('attendance-id').value;
+            const attData = {
+                id: id || Date.now().toString(),
+                date: document.getElementById('attendance-date').value,
+                workerId: document.getElementById('attendance-worker').value,
+                projectId: document.getElementById('attendance-project').value,
+                status: document.getElementById('attendance-status').value,
+                note: document.getElementById('attendance-note').value
+            };
+
+            if (id) {
+                const idx = state.data.attendance.findIndex(a => a.id === id);
+                if (idx !== -1) state.data.attendance[idx] = attData;
+            } else {
+                state.data.attendance.push(attData);
+            }
+
+            saveData();
+            closeModal('attendance-modal');
+            loadAttendance();
+            showToast(id ? 'Absensi diupdate!' : 'Absensi dicatat!', 'success');
+        }
+
+        function deleteAttendance(id) {
+            if (!confirm('Yakin ingin menghapus absensi ini?')) return;
+            state.data.attendance = state.data.attendance.filter(a => a.id !== id);
+            saveData();
+            loadAttendance();
+            showToast('Absensi dihapus.', 'success');
+        }
+
+        // ============================================================
+        // CRUD CASHFLOW
+        // ============================================================
+        function openCashflowModal(editId = null) {
+            document.getElementById('cashflow-form').reset();
+            document.getElementById('cashflow-id').value = '';
+            document.getElementById('cashflow-date').value = new Date().toISOString().split('T')[0];
+            document.getElementById('cashflow-modal-title').textContent = editId ? 'Edit Transaksi' : 'Tambah Transaksi';
+
+            if (editId) {
+                const c = state.data.cashflow.find(x => x.id === editId);
+                if (c) {
+                    document.getElementById('cashflow-id').value = c.id;
+                    document.getElementById('cashflow-date').value = c.date;
+                    document.getElementById('cashflow-project').value = c.projectId;
+                    document.getElementById('cashflow-type').value = c.type;
+                    document.getElementById('cashflow-desc').value = c.desc;
+                    document.getElementById('cashflow-amount').value = c.amount;
+                }
+            }
+            document.getElementById('cashflow-modal').classList.add('active');
+        }
+
+        function editCashflow(id) { openCashflowModal(id); }
+
+        function saveCashflow(e) {
+            e.preventDefault();
+            const id = document.getElementById('cashflow-id').value;
+            const cfData = {
+                id: id || Date.now().toString(),
+                date: document.getElementById('cashflow-date').value,
+                projectId: document.getElementById('cashflow-project').value,
+                type: document.getElementById('cashflow-type').value,
+                desc: document.getElementById('cashflow-desc').value,
+                amount: parseFloat(document.getElementById('cashflow-amount').value) || 0
+            };
+
+            if (id) {
+                const idx = state.data.cashflow.findIndex(c => c.id === id);
+                if (idx !== -1) state.data.cashflow[idx] = cfData;
+            } else {
+                state.data.cashflow.push(cfData);
+            }
+
+            saveData();
+            closeModal('cashflow-modal');
+            loadCashflow();
+            updateDashboard();
+            showToast(id ? 'Transaksi diupdate!' : 'Transaksi ditambahkan!', 'success');
+        }
+
+        function deleteCashflow(id) {
+            if (!confirm('Yakin ingin menghapus transaksi ini?')) return;
+            state.data.cashflow = state.data.cashflow.filter(c => c.id !== id);
+            saveData();
+            loadCashflow();
+            updateDashboard();
+            showToast('Transaksi dihapus.', 'success');
+        }
+
+        // ============================================================
+        // CRUD USERS
+        // ============================================================
+        function openUserModal(editId = null) {
+            document.getElementById('user-form').reset();
+            document.getElementById('user-id').value = '';
+            document.getElementById('user-modal-title').textContent = editId ? 'Edit Pengguna' : 'Tambah Pengguna';
+
+            if (editId) {
+                const u = state.data.users.find(x => x.id === editId);
+                if (u) {
+                    document.getElementById('user-id').value = u.id;
+                    document.getElementById('user-username').value = u.username;
+                    document.getElementById('user-fullname').value = u.fullname;
+                    document.getElementById('user-role').value = u.role;
+                }
+            }
+            document.getElementById('user-modal').classList.add('active');
+        }
+
+        function editUser(id) { openUserModal(id); }
+
+        function saveUser(e) {
+            e.preventDefault();
+            const id = document.getElementById('user-id').value;
+            const password = document.getElementById('user-password').value;
+
+            const userData = {
+                id: id || Date.now().toString(),
+                username: document.getElementById('user-username').value,
+                fullname: document.getElementById('user-fullname').value,
+                role: document.getElementById('user-role').value,
+                status: 'Aktif'
+            };
+
+            if (id) {
+                const idx = state.data.users.findIndex(u => u.id === id);
+                if (idx !== -1) {
+                    if (password) userData.password = password;
+                    else userData.password = state.data.users[idx].password;
+                    state.data.users[idx] = userData;
+                }
+            } else {
+                if (!password) { showToast('Password harus diisi!', 'error'); return; }
+                userData.password = password;
+                state.data.users.push(userData);
+            }
+
+            saveData();
+            closeModal('user-modal');
+            loadUsers();
+            showToast(id ? 'Pengguna diupdate!' : 'Pengguna ditambahkan!', 'success');
+        }
+
+        function deleteUser(id) {
+            if (!confirm('Yakin ingin menghapus pengguna ini?')) return;
+            state.data.users = state.data.users.filter(u => u.id !== id);
+            saveData();
+            loadUsers();
+            showToast('Pengguna dihapus.', 'success');
+        }
+
+        // ============================================================
+        // SETTINGS
+        // ============================================================
+        function switchSettingsTab(tab) {
+            document.querySelectorAll('#section-settings .tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('#section-settings .tab').forEach(t => {
+                if (t.textContent.toLowerCase().includes(tab === 'company' ? 'perusahaan' : tab === 'app' ? 'aplikasi' : 'sistem')) {
+                    t.classList.add('active');
+                }
+            });
+            document.getElementById('company-settings-tab').style.display = tab === 'company' ? 'block' : 'none';
+            document.getElementById('app-settings-tab').style.display = tab === 'app' ? 'block' : 'none';
+            document.getElementById('system-settings-tab').style.display = tab === 'system' ? 'block' : 'none';
+        }
+
+        function switchWorkerTab(tab) {
+            document.querySelectorAll('#section-workers .tab').forEach(t => t.classList.remove('active'));
+            if (tab === 'workers-list') {
+                document.querySelectorAll('#section-workers .tab')[0].classList.add('active');
+                document.getElementById('workers-list-tab').style.display = 'block';
+                document.getElementById('attendance-tab').style.display = 'none';
+            } else {
+                document.querySelectorAll('#section-workers .tab')[1].classList.add('active');
+                document.getElementById('workers-list-tab').style.display = 'none';
+                document.getElementById('attendance-tab').style.display = 'block';
+            }
+        }
+
+        function saveCompanySettings() {
+            state.data.settings.company = {
+                name: document.getElementById('set-company-name').value,
+                address: document.getElementById('set-company-address').value,
+                phone: document.getElementById('set-company-phone').value,
+                email: document.getElementById('set-company-email').value
+            };
+            saveData();
+            showToast('Pengaturan perusahaan disimpan!', 'success');
+        }
+
+        function saveAppSettings() {
+            state.data.settings.app = {
+                name: document.getElementById('set-app-name').value,
+                currency: document.getElementById('set-app-currency').value
+            };
+            saveData();
+            showToast('Pengaturan aplikasi disimpan!', 'success');
+        }
+
+        function saveSystemSettings() {
+            state.data.settings.system.url = document.getElementById('set-system-url').value;
+            saveData();
+            showToast('Pengaturan sistem disimpan!', 'success');
+        }
+
+        // ============================================================
+        // REPORTS
+        // ============================================================
+        function generateReport() {
+            const projectId = document.getElementById('report-project-select').value;
+            const container = document.getElementById('report-content');
+            if (!projectId) { container.innerHTML = ''; return; }
+
+            const project = state.data.projects.find(p => p.id === projectId);
+            if (!project) return;
+
+            const works = state.data.works.filter(w => w.projectId === projectId);
+            const workers = state.data.workers.filter(w => w.projectId === projectId);
+            const cashflow = state.data.cashflow.filter(c => c.projectId === projectId);
+            const income = cashflow.filter(c => c.type === 'Pemasukan').reduce((sum, c) => sum + c.amount, 0);
+            const expense = cashflow.filter(c => c.type === 'Pengeluaran').reduce((sum, c) => sum + c.amount, 0);
+
+            container.innerHTML = `
+                <div class="card" style="padding: 20px;">
+                    <h3>${project.name}</h3>
+                    <p><strong>Jenis:</strong> ${project.type} | <strong>Lokasi:</strong> ${project.location} | <strong>Status:</strong> ${project.status}</p>
+                    <p><strong>Anggaran:</strong> Rp ${formatNumber(project.budget)}</p>
+                    <hr style="margin: 15px 0; border-color: var(--border);">
+                    <h4>Ringkasan</h4>
+                    <p>Pekerjaan: ${works.length} item | Pekerja: ${workers.length} orang</p>
+                    <p>Pemasukan: Rp ${formatNumber(income)} | Pengeluaran: Rp ${formatNumber(expense)}</p>
+                    <p>Saldo: Rp ${formatNumber(income - expense)}</p>
+                </div>
+            `;
+        }
+
+        function printReport(type) {
+            const projectId = document.getElementById('report-project-select').value;
+            if (!projectId) { showToast('Pilih proyek terlebih dahulu!', 'error'); return; }
+
+            const project = state.data.projects.find(p => p.id === projectId);
+            if (!project) return;
+
+            const works = state.data.works.filter(w => w.projectId === projectId);
+            const workers = state.data.workers.filter(w => w.projectId === projectId);
+            const cashflow = state.data.cashflow.filter(c => c.projectId === projectId);
+            const income = cashflow.filter(c => c.type === 'Pemasukan').reduce((sum, c) => sum + c.amount, 0);
+            const expense = cashflow.filter(c => c.type === 'Pengeluaran').reduce((sum, c) => sum + c.amount, 0);
+            const company = state.data.settings.company;
+
+            if (type === 'thermal') {
+                const win = window.open('', '_blank');
+                win.document.write(`
+                    <html><head><title>Laporan Thermal</title>
+                    <style>
+                        body { font-family: 'Courier New', monospace; font-size: 12px; width: 80mm; margin: 0 auto; padding: 10px; }
+                        table { width: 100%; border-collapse: collapse; }
+                        th, td { padding: 2px 4px; font-size: 11px; text-align: left; }
+                        .center { text-align: center; }
+                        hr { border: 1px dashed #000; }
+                    </style></head><body>
+                    <div class="center"><strong>${company.name}</strong><br>${company.address}<br>${company.phone}</div>
+                    <hr>
+                    <div class="center"><strong>LAPORAN PROYEK</strong></div>
+                    <hr>
+                    <p>Proyek: ${project.name}<br>Jenis: ${project.type}<br>Lokasi: ${project.location}<br>Status: ${project.status}</p>
+                    <hr>
+                    <p>Anggaran: Rp ${formatNumber(project.budget)}<br>
+                    Pemasukan: Rp ${formatNumber(income)}<br>
+                    Pengeluaran: Rp ${formatNumber(expense)}<br>
+                    Saldo: Rp ${formatNumber(income - expense)}</p>
+                    <hr>
+                    <p>Pekerjaan: ${works.length} item<br>Pekerja: ${workers.length} orang</p>
+                    <hr>
+                    <div class="center">Dicetak: ${new Date().toLocaleString('id-ID')}</div>
+                    <button onclick="window.print()" style="margin-top:10px; width:100%; padding:8px;">Cetak</button>
+                    </body></html>
+                `);
+                win.document.close();
+            } else {
+                const win = window.open('', '_blank');
+                win.document.write(`
+                    <html><head><title>Laporan - ${project.name}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 20px; }
+                        h1 { font-size: 18px; text-align: center; }
+                        table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+                        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 12px; }
+                        th { background: #f0f0f0; }
+                        .center { text-align: center; }
+                        @media print { .no-print { display: none; } }
+                    </style></head><body>
+                    <h1>LAPORAN PROYEK</h1>
+                    <p><strong>${company.name}</strong><br>${company.address}<br>${company.phone}</p>
+                    <hr>
+                    <table>
+                        <tr><th>Nama Proyek</th><td>${project.name}</td></tr>
+                        <tr><th>Jenis</th><td>${project.type}</td></tr>
+                        <tr><th>Lokasi</th><td>${project.location}</td></tr>
+                        <tr><th>Status</th><td>${project.status}</td></tr>
+                        <tr><th>Anggaran</th><td>Rp ${formatNumber(project.budget)}</td></tr>
+                    </table>
+                    <h3>Ringkasan Keuangan</h3>
+                    <table>
+                        <tr><th>Pemasukan</th><td>Rp ${formatNumber(income)}</td></tr>
+                        <tr><th>Pengeluaran</th><td>Rp ${formatNumber(expense)}</td></tr>
+                        <tr><th>Saldo</th><td>Rp ${formatNumber(income - expense)}</td></tr>
+                    </table>
+                    <h3>Pekerjaan (${works.length} item)</h3>
+                    <table>
+                        <thead><tr><th>No</th><th>Nama</th><th>Volume</th><th>Satuan</th><th>Status</th></tr></thead>
+                        <tbody>${works.map((w, i) => `<tr><td>${i+1}</td><td>${w.name}</td><td>${w.volume}</td><td>${w.unit}</td><td>${w.status}</td></tr>`).join('') || '<tr><td colspan="5" class="center">Tidak ada data</td></tr>'}</tbody>
+                    </table>
+                    <h3>Pekerja (${workers.length} orang)</h3>
+                    <table>
+                        <thead><tr><th>No</th><th>Nama</th><th>Jabatan</th><th>No. HP</th></tr></thead>
+                        <tbody>${workers.map((w, i) => `<tr><td>${i+1}</td><td>${w.name}</td><td>${w.position}</td><td>${w.phone || '-'}</td></tr>`).join('') || '<tr><td colspan="4" class="center">Tidak ada data</td></tr>'}</tbody>
+                    </table>
+                    <p style="margin-top:20px; text-align:right;">Dicetak: ${new Date().toLocaleString('id-ID')}</p>
+                    <button class="no-print" onclick="window.print()" style="margin-top:20px; padding:10px 20px; cursor:pointer;">Cetak</button>
+                    </body></html>
+                `);
+                win.document.close();
+            }
+        }
+
+        // ============================================================
+        // BACKUP / RESTORE
+        // ============================================================
+        function backupData() {
+            const dataStr = JSON.stringify(state.data, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `backup_manajemen_proyek_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('Backup berhasil diunduh!', 'success');
+        }
+
+        function restoreData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (confirm('Yakin ingin merestore data? Data saat ini akan diganti.')) {
+                        state.data = data;
+                        saveData();
+                        loadAllData();
+                        showToast('Data berhasil direstore!', 'success');
+                    }
+                } catch (err) {
+                    showToast('File backup tidak valid!', 'error');
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        // ============================================================
+        // KEYBOARD SHORTCUTS
+        // ============================================================
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal-overlay.active').forEach(m => m.classList.remove('active'));
+                document.getElementById('sidebar').classList.remove('active');
+            }
+        });
+
+        // Close modal on overlay click
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) overlay.classList.remove('active');
+            });
+        });
+    </script>
+</body>
+</html>
