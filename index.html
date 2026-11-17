@@ -823,6 +823,23 @@
             </div>
           </div>
 
+          <div class="no-print bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div><h3 class="font-extrabold text-sm">Tanda Tangan Manager Lapangan</h3><p class="text-xs text-slate-500 mt-1">Tanda tangan akan dicantumkan pada laporan PDF dan hasil cetak.</p></div>
+              <span class="text-[11px] text-slate-400">Gunakan jari, stylus, atau mouse</span>
+            </div>
+            <label class="block text-xs font-bold text-slate-500" for="lap-manager-name">Nama Manager Lapangan</label>
+            <input id="lap-manager-name" type="text" placeholder="Masukkan nama manager lapangan" class="w-full sm:max-w-md px-3 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-sm" />
+            <div class="max-w-2xl rounded-xl border border-dashed border-slate-300 dark:border-slate-600 bg-white overflow-hidden">
+              <canvas id="lap-manager-signature" width="1000" height="300" aria-label="Area tanda tangan manager lapangan" class="block w-full touch-none" style="height:150px;touch-action:none;cursor:crosshair"></canvas>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <button type="button" onclick="clearManagerSignature()" class="px-4 py-2 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-white text-xs font-bold">Hapus Tanda Tangan</button>
+              <button type="button" onclick="saveManagerSignature()" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold">Simpan Tanda Tangan</button>
+              <span id="lap-signature-status" class="self-center text-xs text-slate-500" aria-live="polite"></span>
+            </div>
+          </div>
+
           <div id="laporan-print-wrapper" class="paper-A4 bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-6 overflow-x-auto">
             <div class="border-b border-slate-300 dark:border-slate-700 pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
@@ -836,6 +853,7 @@
             </div>
 
             <div id="laporan-dynamic-content" class="space-y-6 text-xs sm:text-sm"></div>
+            <div id="laporan-manager-signature" class="text-slate-900"></div>
 
             <div class="pt-4 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row justify-between items-center text-[11px] text-slate-400 gap-2">
               <span id="lap-footer-note">Dicetak melalui Sistem PUGUH-JOGJA</span>
@@ -960,6 +978,7 @@
       AbsensiPekerja: [],
       ArusKas: [],
       Users: [],
+      TandaTangan: [],
       PengaturanMap: {
         nama_perusahaan: 'PUGUH-JOGJA KONSTRUKSI & RENOVASI',
         alamat: 'Jl. Kaliurang KM 7, Sleman, DI Yogyakarta',
@@ -1029,6 +1048,7 @@
     document.addEventListener('DOMContentLoaded', () => {
       initTheme();
       lucide.createIcons();
+      setupManagerSignaturePad();
       const installButton = document.getElementById('install-app-btn');
       if (installButton && isAppStandalone()) { const installLabel = document.getElementById('install-app-label'); if (installLabel) installLabel.textContent = 'Aplikasi Terpasang'; }
 
@@ -1817,6 +1837,71 @@
       postToBackend({ action: 'save', table: 'ArusKas', record });
     }
 
+    const MANAGER_SIGNATURE_KEY = 'PUGUH_JOGJA_MANAGER_SIGNATURE_V1';
+    const MANAGER_SIGNATURE_ID = 'MANAGER_LAPANGAN';
+    let managerSignatureDrawing = false;
+    let managerSignatureHasInk = false;
+
+    function getManagerSignatureCanvas() { return document.getElementById('lap-manager-signature'); }
+    function getManagerSignatureRecord() {
+      const rows = Array.isArray(APP_STATE.TandaTangan) ? APP_STATE.TandaTangan : [];
+      return rows.find(x => x && x.id === MANAGER_SIGNATURE_ID) || null;
+    }
+    function setManagerSignatureCanvas(dataUrl) {
+      const canvas = getManagerSignatureCanvas();
+      if (!canvas || !dataUrl || !/^data:image\/(png|jpeg|jpg|webp);base64,/i.test(dataUrl)) return;
+      const ctx = canvas.getContext('2d'); const img = new Image();
+      img.onload = () => { ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.drawImage(img, 0, 0, canvas.width, canvas.height); managerSignatureHasInk = true; };
+      img.src = dataUrl;
+    }
+    function setupManagerSignaturePad() {
+      const canvas = getManagerSignatureCanvas();
+      if (!canvas || canvas.dataset.ready === '1') return;
+      const ctx = canvas.getContext('2d');
+      ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = '#111827';
+      const point = event => { const rect = canvas.getBoundingClientRect(); return { x: (event.clientX - rect.left) * canvas.width / rect.width, y: (event.clientY - rect.top) * canvas.height / rect.height }; };
+      canvas.addEventListener('pointerdown', event => { event.preventDefault(); canvas.setPointerCapture(event.pointerId); const p = point(event); ctx.beginPath(); ctx.moveTo(p.x, p.y); managerSignatureDrawing = true; managerSignatureHasInk = true; });
+      canvas.addEventListener('pointermove', event => { if (!managerSignatureDrawing) return; event.preventDefault(); const p = point(event); ctx.lineTo(p.x, p.y); ctx.stroke(); });
+      const finish = () => { managerSignatureDrawing = false; };
+      canvas.addEventListener('pointerup', finish); canvas.addEventListener('pointercancel', finish); canvas.addEventListener('lostpointercapture', finish);
+      canvas.dataset.ready = '1';
+      let saved = null; try { saved = JSON.parse(localStorage.getItem(MANAGER_SIGNATURE_KEY) || 'null'); } catch (e) {}
+      if (saved) { const nameInput = document.getElementById('lap-manager-name'); if (nameInput) nameInput.value = saved.name || ''; setManagerSignatureCanvas(saved.image); }
+    }
+    function clearManagerSignature() {
+      const canvas = getManagerSignatureCanvas(); if (canvas) canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+      managerSignatureHasInk = false;
+      try { localStorage.removeItem(MANAGER_SIGNATURE_KEY); } catch (e) {}
+      APP_STATE.TandaTangan = (APP_STATE.TandaTangan || []).filter(x => x.id !== MANAGER_SIGNATURE_ID);
+      const status = document.getElementById('lap-signature-status'); if (status) status.textContent = 'Tanda tangan dihapus.';
+      renderManagerSignatureReport();
+      if (GAS_URL) postToBackend({ action: 'delete', table: 'TandaTangan', id: MANAGER_SIGNATURE_ID });
+      else saveToLocalStorage();
+    }
+    function saveManagerSignature() {
+      const canvas = getManagerSignatureCanvas(); const name = (document.getElementById('lap-manager-name')?.value || '').trim();
+      if (!name) { showToast('Masukkan nama Manager Lapangan terlebih dahulu.', 'error'); return; }
+      if (!canvas || !managerSignatureHasInk) { showToast('Bubuhkan tanda tangan terlebih dahulu.', 'error'); return; }
+      let image; try { image = canvas.toDataURL('image/png'); } catch (e) { showToast('Tanda tangan tidak dapat dibaca. Silakan hapus lalu gambar ulang.', 'error'); return; }
+      const record = { id: MANAGER_SIGNATURE_ID, name, image, updatedAt: new Date().toISOString() };
+      APP_STATE.TandaTangan = (APP_STATE.TandaTangan || []).filter(x => x.id !== MANAGER_SIGNATURE_ID).concat([record]);
+      try { localStorage.setItem(MANAGER_SIGNATURE_KEY, JSON.stringify(record)); } catch (e) { showToast('Penyimpanan lokal penuh. Data tetap akan dikirim ke server jika terhubung.', 'error'); }
+      saveToLocalStorage(); renderManagerSignatureReport();
+      const status = document.getElementById('lap-signature-status'); if (status) status.textContent = GAS_URL ? 'Mengirim tanda tangan ke Google Sheets...' : 'Tersimpan di perangkat. Hubungkan Google Sheets untuk sinkronisasi.';
+      if (GAS_URL) postToBackend({ action: 'save', table: 'TandaTangan', record });
+      else showToast('Tanda tangan tersimpan di perangkat. Hubungkan database untuk sinkronisasi cloud.');
+    }
+    function renderManagerSignatureReport() {
+      const host = document.getElementById('laporan-manager-signature'); if (!host) return;
+      let data = getManagerSignatureRecord();
+      if (!data) { try { data = JSON.parse(localStorage.getItem(MANAGER_SIGNATURE_KEY) || 'null'); } catch (e) {} }
+      if (!data || !data.image) { host.innerHTML = '<p class="mt-8 text-right text-xs text-slate-500">Tanda tangan Manager Lapangan belum diisi.</p>'; return; }
+      const image = String(data.image);
+      const safeImage = /^data:image\/(png|jpeg|jpg|webp);base64,/i.test(image) || /^https:\/\/drive\.google\.com\/(uc\?|file\/d\/)/i.test(image) ? image : '';
+      host.innerHTML = safeImage ? `<div class="ml-auto mt-8 w-full max-w-xs text-center text-slate-900 break-inside-avoid"><p class="text-xs mb-2">Mengetahui,</p><p class="text-sm font-bold">Manager Lapangan</p><img src="${safeImage}" alt="Tanda tangan Manager Lapangan" class="mx-auto my-2 object-contain" style="width:220px;height:85px"/><p class="text-sm font-bold underline">${escapeHtml(data.name)}</p><p class="text-[10px] text-slate-500">Manager Lapangan</p></div>` : '<p class="mt-8 text-right text-xs text-slate-500">Gambar tanda tangan tidak valid.</p>';
+    }
+    function escapeHtml(value) { return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
+
     function renderLaporan() {
       const proyekId = document.getElementById('lap-project-select').value;
       const type = document.getElementById('lap-type-select').value;
@@ -1845,6 +1930,7 @@
         html += `<div><h4 class="font-bold uppercase text-xs mb-2 text-amber-600">D. Arus Kas</h4><div class="overflow-x-auto"><table class="w-full text-xs whitespace-nowrap"><thead><tr class="border-b"><th class="p-2 text-left">Tanggal</th><th class="p-2 text-left">Keterangan</th><th class="p-2 text-center">Jenis</th><th class="p-2 text-right">Nominal</th></tr></thead><tbody>${kas.map(x=>`<tr class="border-b"><td class="p-2">${x.tanggal}</td><td class="p-2"><b>${x.kategori}</b>: ${x.keterangan}</td><td class="p-2 text-center">${x.jenis}</td><td class="p-2 text-right">${formatRupiah(x.nominal)}</td></tr>`).join('')}<tr class="font-bold"><td colspan="3" class="p-2 text-right">Sisa Saldo Bersih:</td><td class="p-2 text-right text-amber-600">${formatRupiah(m - k)}</td></tr></tbody></table></div></div>`;
       }
       document.getElementById('laporan-dynamic-content').innerHTML = html;
+      renderManagerSignatureReport();
     }
 
     function applyPaperClass(wrapperId, paperClass) {
