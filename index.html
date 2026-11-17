@@ -24,25 +24,17 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
-    /* Custom Scrollbar */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     .dark ::-webkit-scrollbar-thumb { background: #475569; }
 
-    /* Print Styles (A4 & Thermal 58mm / 80mm) */
     @media print {
       body * { visibility: hidden; }
       #printArea, #printArea * { visibility: visible; }
       #printArea {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        background: white !important;
-        color: black !important;
-        padding: 0;
-        margin: 0;
+        position: absolute; left: 0; top: 0; width: 100%;
+        background: white !important; color: black !important; padding: 0; margin: 0;
       }
       body.print-thermal-58 #printArea { width: 58mm !important; font-size: 10px !important; font-family: monospace !important; }
       body.print-thermal-80 #printArea { width: 80mm !important; font-size: 11px !important; font-family: monospace !important; }
@@ -109,7 +101,7 @@
     <!-- SIDEBAR OVERLAY (MOBILE) -->
     <div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/50 z-30 hidden md:hidden"></div>
 
-    <!-- SIDEBAR -->
+    <!-- SIDEBAR (Tanpa Penomoran Angka pada Menu) -->
     <aside id="sidebar" class="fixed md:sticky top-0 left-0 z-40 h-screen w-72 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col transform -translate-x-full md:translate-x-0 transition-transform duration-200">
       <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
         <div class="flex items-center gap-3">
@@ -132,32 +124,32 @@
           <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard
         </button>
         <button data-menu="proyek" onclick="navigate('proyek')" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition">
-          <i data-lucide="folder-kanban" class="w-4 h-4"></i> 1. Pengaturan Proyek
+          <i data-lucide="folder-kanban" class="w-4 h-4"></i> Pengaturan Proyek
         </button>
         <button data-menu="rab" onclick="navigate('rab')" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition">
-          <i data-lucide="calculator" class="w-4 h-4"></i> 2. Rencana Anggaran (RAB)
+          <i data-lucide="calculator" class="w-4 h-4"></i> Rencana Anggaran (RAB)
         </button>
         <button data-menu="pekerjaan" onclick="navigate('pekerjaan')" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition">
-          <i data-lucide="clipboard-check" class="w-4 h-4"></i> 3. Pekerjaan Proyek
+          <i data-lucide="clipboard-check" class="w-4 h-4"></i> Pekerjaan Proyek
         </button>
         <button data-menu="pekerja" onclick="navigate('pekerja')" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition">
-          <i data-lucide="hard-hat" class="w-4 h-4"></i> 4. Pekerja & Absensi
+          <i data-lucide="hard-hat" class="w-4 h-4"></i> Pekerja & Absensi
         </button>
         <button data-menu="kas" onclick="navigate('kas')" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition">
-          <i data-lucide="wallet" class="w-4 h-4"></i> 5. Arus Kas Proyek
+          <i data-lucide="wallet" class="w-4 h-4"></i> Arus Kas Proyek
         </button>
         <button data-menu="laporan" onclick="navigate('laporan')" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition">
-          <i data-lucide="printer" class="w-4 h-4"></i> 6. Laporan & Cetak
+          <i data-lucide="printer" class="w-4 h-4"></i> Laporan & Cetak
         </button>
         <div class="pt-3 pb-1 px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">Administrasi</div>
         <button data-menu="users" onclick="navigate('users')" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition">
-          <i data-lucide="shield-check" class="w-4 h-4"></i> 7. User & Hak Akses
+          <i data-lucide="shield-check" class="w-4 h-4"></i> User & Hak Akses
         </button>
         <button data-menu="settings" onclick="navigate('settings')" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition">
-          <i data-lucide="settings" class="w-4 h-4"></i> 8. Pengaturan Sistem
+          <i data-lucide="settings" class="w-4 h-4"></i> Pengaturan Sistem
         </button>
         <button data-menu="backup" onclick="navigate('backup')" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition">
-          <i data-lucide="database-backup" class="w-4 h-4"></i> 9. Backup & Restore
+          <i data-lucide="database-backup" class="w-4 h-4"></i> Backup & Restore
         </button>
       </nav>
 
@@ -215,11 +207,6 @@
   </div>
 
 <script>
-/**
- * ============================================================================
- * STATE MANAGEMENT & DATABASE LOKAL + CLOUD SYNC
- * ============================================================================
- */
 const DEFAULT_DB = {
   projects: [
     {
@@ -299,7 +286,6 @@ function generateId(prefix) {
   return prefix + "-" + Math.floor(1000 + Math.random() * 9000);
 }
 
-// Kompresi Gambar Otomatis dari Kamera HP/Perangkat
 function compressImage(file, maxWidth = 800, quality = 0.7) {
   return new Promise((resolve) => {
     const reader = new FileReader();
@@ -325,11 +311,10 @@ function compressImage(file, maxWidth = 800, quality = 0.7) {
   });
 }
 
-// Sinkronisasi Cloud Google Apps Script
 async function syncWithCloud() {
   const url = DB.settings.gasUrl;
   if (!url) {
-    showToast("URL Google Apps Script belum diatur di Menu 8!");
+    showToast("URL Google Apps Script belum diatur di Pengaturan Sistem!");
     return;
   }
   showToast("Menyinkronkan data dengan Cloud...");
@@ -339,10 +324,7 @@ async function syncWithCloud() {
       action: "syncAll",
       data: { ...DB, settings: settingsArray }
     };
-    const res = await fetch(url, {
-      method: "POST",
-      body: JSON.stringify(payload)
-    });
+    const res = await fetch(url, { method: "POST", body: JSON.stringify(payload) });
     const json = await res.json();
     if (json.status === "success") {
       showToast("Sinkronisasi Cloud Berhasil!");
@@ -384,11 +366,6 @@ async function pullFromCloud() {
   }
 }
 
-/**
- * ============================================================================
- * AUTHENTICATION & NAVIGATION
- * ============================================================================
- */
 document.getElementById("loginForm").addEventListener("submit", (e) => {
   e.preventDefault();
   const u = document.getElementById("loginUsername").value.trim();
@@ -443,7 +420,6 @@ function initApp() {
   document.getElementById("currentUserRole").innerText = currentUser.role;
   document.getElementById("userAvatar").innerText = currentUser.nama.charAt(0).toUpperCase();
 
-  // Filter Menu sesuai Hak Akses
   document.querySelectorAll(".nav-item").forEach(btn => {
     const menuKey = btn.getAttribute("data-menu");
     if (menuKey === "dashboard" || currentUser.hakAkses.includes(menuKey)) {
@@ -477,15 +453,15 @@ function navigate(menu) {
   const area = document.getElementById("contentArea");
   const titles = {
     dashboard: ["Dashboard Utama", "Ringkasan proyek, RAB, absensi, dan arus kas"],
-    proyek: ["1. Pengaturan Proyek", "Kelola daftar proyek beserta dokumentasi foto Before & After"],
-    rab: ["2. Rencana Anggaran Belanja (RAB)", "Penyusunan RAB per jenis proyek & tanda tangan digital manajer"],
-    pekerjaan: ["3. Pekerjaan Berdasarkan Proyek", "Monitoring progres item pekerjaan & jadwal lapangan"],
-    pekerja: ["4. Pekerja & Absensi Proyek", "Database tenaga kerja, upah harian, dan rekap kehadiran"],
-    kas: ["5. Arus Kas Proyek", "Pencatatan pemasukan termin & pengeluaran operasional proyek"],
-    laporan: ["6. Laporan Proyek & Cetak", "Cetak laporan format A4 PDF atau Struk Printer Thermal (58mm/80mm)"],
-    users: ["7. Administrator User & Hak Akses", "Manajemen akun pengguna dan otorisasi modul"],
-    settings: ["8. Pengaturan Sistem & Perusahaan", "Identitas perusahaan, nama aplikasi, dan koneksi Google Apps Script"],
-    backup: ["9. Backup & Restore Data", "Ekspor cadangan database JSON atau pulihkan data"]
+    proyek: ["Pengaturan Proyek", "Kelola daftar proyek beserta dokumentasi foto Before & After"],
+    rab: ["Rencana Anggaran Belanja (RAB)", "Penyusunan RAB per jenis proyek & tanda tangan digital manajer"],
+    pekerjaan: ["Pekerjaan Proyek", "Monitoring progres item pekerjaan & jadwal lapangan"],
+    pekerja: ["Pekerja & Absensi Proyek", "Database tenaga kerja, upah harian, dan rekap kehadiran"],
+    kas: ["Arus Kas Proyek", "Pencatatan pemasukan termin & pengeluaran operasional proyek"],
+    laporan: ["Laporan Proyek & Cetak", "Cetak laporan format A4 PDF atau Struk Printer Thermal (58mm/80mm)"],
+    users: ["Administrator User & Hak Akses", "Manajemen akun pengguna dan otorisasi modul"],
+    settings: ["Pengaturan Sistem & Perusahaan", "Identitas perusahaan, nama aplikasi, dan koneksi Google Apps Script"],
+    backup: ["Backup & Restore Data", "Ekspor cadangan database JSON atau pulihkan data"]
   };
 
   document.getElementById("pageTitle").innerText = titles[menu][0];
@@ -506,11 +482,6 @@ function navigate(menu) {
   lucide.createIcons();
 }
 
-/**
- * ============================================================================
- * 0. DASHBOARD
- * ============================================================================
- */
 function renderDashboard(area) {
   const totalProyek = DB.projects.length;
   const totalRAB = DB.rab.reduce((acc, r) => acc + Number(r.total || 0), 0);
@@ -528,7 +499,6 @@ function renderDashboard(area) {
         <div class="text-2xl font-bold">${totalProyek} Proyek</div>
         <div class="text-xs text-emerald-500 mt-1">${DB.projects.filter(p => p.status === 'Berjalan').length} Sedang Berjalan</div>
       </div>
-
       <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
         <div class="flex items-center justify-between mb-3">
           <span class="text-sm text-slate-500">Total Nilai RAB</span>
@@ -537,7 +507,6 @@ function renderDashboard(area) {
         <div class="text-2xl font-bold">${formatRupiah(totalRAB)}</div>
         <div class="text-xs text-slate-400 mt-1">${DB.rab.length} Item Anggaran</div>
       </div>
-
       <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
         <div class="flex items-center justify-between mb-3">
           <span class="text-sm text-slate-500">Saldo Kas Proyek</span>
@@ -546,7 +515,6 @@ function renderDashboard(area) {
         <div class="text-2xl font-bold ${saldoKas < 0 ? 'text-rose-500' : 'text-emerald-600 dark:text-emerald-400'}">${formatRupiah(saldoKas)}</div>
         <div class="text-xs text-slate-400 mt-1">Masuk: ${formatRupiah(kasMasuk)}</div>
       </div>
-
       <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
         <div class="flex items-center justify-between mb-3">
           <span class="text-sm text-slate-500">Tenaga Kerja Aktif</span>
@@ -598,11 +566,6 @@ function renderDashboard(area) {
   `;
 }
 
-/**
- * ============================================================================
- * 1. MENU PENGATURAN PROYEK (UPLOAD FOTO BEFORE & AFTER DARI KAMERA / PERANGKAT)
- * ============================================================================
- */
 let tempBeforeImg = "", tempAfterImg = "";
 
 function renderProyek(area) {
@@ -647,1078 +610,9 @@ function renderProyek(area) {
             <option>Ditunda</option>
           </select>
         </div>
-
-        <!-- UPLOAD FOTO BEFORE (KAMERA / GALERI) -->
         <div class="md:col-span-1 border border-dashed border-slate-300 dark:border-slate-700 p-4 rounded-xl">
           <label class="block text-xs font-bold mb-2 text-blue-600">📷 Foto BEFORE (Kondisi Awal)</label>
           <input type="file" accept="image/*" capture="environment" onchange="handleProjectPhoto(this, 'before')" class="text-xs w-full mb-2">
           <img id="previewBefore" class="hidden w-full h-36 object-cover rounded-lg border">
         </div>
-
-        <!-- UPLOAD FOTO AFTER (KAMERA / GALERI) -->
-        <div class="md:col-span-1 border border-dashed border-slate-300 dark:border-slate-700 p-4 rounded-xl">
-          <label class="block text-xs font-bold mb-2 text-emerald-600">📷 Foto AFTER (Hasil Akhir)</label>
-          <input type="file" accept="image/*" capture="environment" onchange="handleProjectPhoto(this, 'after')" class="text-xs w-full mb-2">
-          <img id="previewAfter" class="hidden w-full h-36 object-cover rounded-lg border">
-        </div>
-
-        <div class="flex items-end gap-2">
-          <button type="submit" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl text-sm">Simpan Proyek</button>
-          <button type="button" onclick="renderProyek(document.getElementById('contentArea'))" class="px-4 py-2.5 bg-slate-200 dark:bg-slate-800 rounded-xl text-sm">Reset</button>
-        </div>
-      </form>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      ${DB.projects.map(p => `
-        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
-          <div class="p-5">
-            <div class="flex justify-between items-start">
-              <div>
-                <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">${p.jenis}</span>
-                <h4 class="font-bold text-lg mt-2">${p.nama}</h4>
-                <p class="text-xs text-slate-500 mt-0.5"><i data-lucide="map-pin" class="w-3 h-3 inline"></i> ${p.lokasi || '-'} • Klien: ${p.klien || '-'}</p>
-              </div>
-              <span class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">${p.status}</span>
-            </div>
-
-            <div class="grid grid-cols-2 gap-3 mt-4">
-              <div class="bg-slate-100 dark:bg-slate-800 rounded-xl p-2 text-center">
-                <p class="text-[10px] font-bold uppercase text-slate-500 mb-1">Before</p>
-                ${p.fotoBefore ? `<img src="${p.fotoBefore}" class="w-full h-28 object-cover rounded-lg">` : `<div class="h-28 flex items-center justify-center text-xs text-slate-400">Belum ada foto</div>`}
-              </div>
-              <div class="bg-slate-100 dark:bg-slate-800 rounded-xl p-2 text-center">
-                <p class="text-[10px] font-bold uppercase text-slate-500 mb-1">After</p>
-                ${p.fotoAfter ? `<img src="${p.fotoAfter}" class="w-full h-28 object-cover rounded-lg">` : `<div class="h-28 flex items-center justify-center text-xs text-slate-400">Belum ada foto</div>`}
-              </div>
-            </div>
-
-            <div class="flex justify-end gap-2 mt-4 pt-3 border-t border-slate-100 dark:border-slate-800">
-              <button onclick="editProyek('${p.id}')" class="px-3 py-1.5 text-xs font-medium bg-amber-100 text-amber-800 rounded-lg">Edit / Upload Foto</button>
-              <button onclick="deleteProyek('${p.id}')" class="px-3 py-1.5 text-xs font-medium bg-rose-100 text-rose-700 rounded-lg">Hapus</button>
-            </div>
-          </div>
-        </div>
-      `).join("")}
-    </div>
-  `;
-
-  document.getElementById("formProyek").addEventListener("submit", (e) => {
-    e.preventDefault();
-    const id = document.getElementById("prjId").value;
-    const existing = DB.projects.find(x => x.id === id);
-    const obj = {
-      id: id || generateId("PRJ"),
-      nama: document.getElementById("prjNama").value,
-      jenis: document.getElementById("prjJenis").value,
-      klien: document.getElementById("prjKlien").value,
-      lokasi: document.getElementById("prjLokasi").value,
-      tanggalMulai: document.getElementById("prjMulai").value,
-      status: document.getElementById("prjStatus").value,
-      fotoBefore: tempBeforeImg || (existing ? existing.fotoBefore : ""),
-      fotoAfter: tempAfterImg || (existing ? existing.fotoAfter : "")
-    };
-    if (existing) {
-      Object.assign(existing, obj);
-    } else {
-      DB.projects.push(obj);
-    }
-    saveDB();
-    showToast("Data proyek & dokumentasi foto tersimpan!");
-    renderProyek(area);
-    lucide.createIcons();
-  });
-}
-
-async function handleProjectPhoto(input, type) {
-  if (!input.files || !input.files[0]) return;
-  showToast("Memproses & mengompresi foto...");
-  const base64 = await compressImage(input.files[0]);
-  if (type === "before") {
-    tempBeforeImg = base64;
-    const img = document.getElementById("previewBefore");
-    img.src = base64;
-    img.classList.remove("hidden");
-  } else {
-    tempAfterImg = base64;
-    const img = document.getElementById("previewAfter");
-    img.src = base64;
-    img.classList.remove("hidden");
-  }
-  showToast("Foto siap disimpan!");
-}
-
-function editProyek(id) {
-  const p = DB.projects.find(x => x.id === id);
-  if (!p) return;
-  document.getElementById("prjId").value = p.id;
-  document.getElementById("prjNama").value = p.nama;
-  document.getElementById("prjJenis").value = p.jenis;
-  document.getElementById("prjKlien").value = p.klien;
-  document.getElementById("prjLokasi").value = p.lokasi;
-  document.getElementById("prjMulai").value = p.tanggalMulai;
-  document.getElementById("prjStatus").value = p.status;
-  if (p.fotoBefore) {
-    const img = document.getElementById("previewBefore");
-    img.src = p.fotoBefore; img.classList.remove("hidden");
-  }
-  if (p.fotoAfter) {
-    const img = document.getElementById("previewAfter");
-    img.src = p.fotoAfter; img.classList.remove("hidden");
-  }
-  window.scrollTo({ top: 0, behavior: "smooth" });
-}
-
-function deleteProyek(id) {
-  if (!confirm("Hapus proyek ini?")) return;
-  DB.projects = DB.projects.filter(x => x.id !== id);
-  saveDB();
-  renderProyek(document.getElementById("contentArea"));
-  lucide.createIcons();
-}
-
-/**
- * ============================================================================
- * 2. MENU RENCANA ANGGARAN BELANJA (RAB) + TANDA TANGAN + PRINT THERMAL / PDF
- * ============================================================================
- */
-function renderRAB(area) {
-  const selectedPrjId = DB.projects[0]?.id || "";
-  area.innerHTML = `
-    <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 mb-6">
-      <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-        <h3 class="font-bold text-base">Input Item Rencana Anggaran Belanja (RAB)</h3>
-        <div class="flex flex-wrap gap-2">
-          <button onclick="printRAB('a4')" class="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5">
-            <i data-lucide="file-text" class="w-3.5 h-3.5"></i> Cetak PDF / A4
-          </button>
-          <button onclick="printRAB('thermal-80')" class="px-3 py-1.5 bg-slate-800 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5">
-            <i data-lucide="printer" class="w-3.5 h-3.5"></i> Thermal 80mm
-          </button>
-          <button onclick="printRAB('thermal-58')" class="px-3 py-1.5 bg-slate-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5">
-            <i data-lucide="receipt" class="w-3.5 h-3.5"></i> Thermal 58mm
-          </button>
-        </div>
-      </div>
-
-      <form id="formRAB" class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div>
-          <label class="block text-xs font-semibold mb-1">Pilih Proyek</label>
-          <select id="rabProjectId" onchange="refreshRABTable()" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
-            ${DB.projects.map(p => `<option value="${p.id}">${p.nama} (${p.jenis})</option>`).join("")}
-          </select>
-        </div>
-        <div>
-          <label class="block text-xs font-semibold mb-1">Kode Pekerjaan</label>
-          <input type="text" id="rabKode" placeholder="A.01" required class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
-        </div>
-        <div class="md:col-span-2">
-          <label class="block text-xs font-semibold mb-1">Uraian Pekerjaan / Material</label>
-          <input type="text" id="rabUraian" placeholder="Pekerjaan Struktur Beton Bertulang" required class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold mb-1">Volume</label>
-          <input type="number" step="0.01" id="rabVol" required class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold mb-1">Satuan</label>
-          <input type="text" id="rabSatuan" placeholder="m3 / m2 / ls / unit" required class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold mb-1">Harga Satuan (Rp)</label>
-          <input type="number" id="rabHarga" required class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
-        </div>
-        <div class="flex items-end">
-          <button type="submit" class="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl text-sm">+ Tambah Item RAB</button>
-        </div>
-      </form>
-    </div>
-
-    <!-- TABEL RAB -->
-    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-x-auto mb-6">
-      <table class="w-full text-sm text-left">
-        <thead class="bg-slate-100 dark:bg-slate-800 text-xs uppercase">
-          <tr>
-            <th class="px-4 py-3">Kode</th>
-            <th class="px-4 py-3">Uraian Pekerjaan</th>
-            <th class="px-4 py-3 text-right">Volume</th>
-            <th class="px-4 py-3">Satuan</th>
-            <th class="px-4 py-3 text-right">Harga Satuan</th>
-            <th class="px-4 py-3 text-right">Total</th>
-            <th class="px-4 py-3 text-center">Aksi</th>
-          </tr>
-        </thead>
-        <tbody id="rabTableBody" class="divide-y divide-slate-200 dark:divide-slate-800"></tbody>
-      </table>
-    </div>
-
-    <!-- PENGESAHAN & TANDA TANGAN MANAGER PROYEK -->
-    <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800">
-      <h3 class="font-bold text-base mb-3">Pengesahan & Tanda Tangan Manager Proyek</h3>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-        <div>
-          <label class="block text-xs font-semibold mb-1">Nama Lengkap & Gelar Manager Proyek</label>
-          <input type="text" id="rabManagerName" value="Ir. Budi Santoso, MT" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm mb-3">
-          <p class="text-xs text-slate-500 mb-2">Goreskan tanda tangan di kotak kanvas sebelah kanan (mendukung layar sentuh HP & mouse).</p>
-          <div class="flex gap-2">
-            <button type="button" onclick="clearSignature()" class="px-3 py-1.5 bg-slate-200 dark:bg-slate-800 rounded-lg text-xs font-medium">Hapus TTD</button>
-            <button type="button" onclick="saveSignatureToRAB()" class="px-4 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-semibold">Simpan TTD ke Proyek Ini</button>
-          </div>
-        </div>
-        <div>
-          <canvas id="sigCanvas" width="350" height="140" class="border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl bg-white w-full max-w-[350px] touch-none cursor-crosshair"></canvas>
-        </div>
-      </div>
-    </div>
-  `;
-
-  initSignaturePad();
-  refreshRABTable();
-
-  document.getElementById("formRAB").addEventListener("submit", (e) => {
-    e.preventDefault();
-    const prjId = document.getElementById("rabProjectId").value;
-    const prj = DB.projects.find(p => p.id === prjId);
-    const vol = Number(document.getElementById("rabVol").value);
-    const harga = Number(document.getElementById("rabHarga").value);
-    DB.rab.push({
-      id: generateId("RAB"),
-      projectId: prjId,
-      jenisProyek: prj ? prj.jenis : "",
-      kode: document.getElementById("rabKode").value,
-      uraian: document.getElementById("rabUraian").value,
-      volume: vol,
-      satuan: document.getElementById("rabSatuan").value,
-      hargaSatuan: harga,
-      total: vol * harga,
-      managerName: document.getElementById("rabManagerName").value,
-      signatureData: signaturePadCanvas.toDataURL()
-    });
-    saveDB();
-    e.target.reset();
-    document.getElementById("rabProjectId").value = prjId;
-    refreshRABTable();
-    showToast("Item RAB ditambahkan!");
-  });
-}
-
-function refreshRABTable() {
-  const prjId = document.getElementById("rabProjectId").value;
-  const items = DB.rab.filter(r => r.projectId === prjId);
-  const tbody = document.getElementById("rabTableBody");
-  let grandTotal = 0;
-
-  tbody.innerHTML = items.map(r => {
-    grandTotal += Number(r.total);
-    return `
-      <tr>
-        <td class="px-4 py-3 font-mono text-xs">${r.kode}</td>
-        <td class="px-4 py-3 font-medium">${r.uraian}</td>
-        <td class="px-4 py-3 text-right">${r.volume}</td>
-        <td class="px-4 py-3">${r.satuan}</td>
-        <td class="px-4 py-3 text-right">${formatRupiah(r.hargaSatuan)}</td>
-        <td class="px-4 py-3 text-right font-semibold">${formatRupiah(r.total)}</td>
-        <td class="px-4 py-3 text-center">
-          <button onclick="deleteRAB('${r.id}')" class="text-rose-500 hover:underline text-xs">Hapus</button>
-        </td>
-      </tr>
-    `;
-  }).join("") + `
-    <tr class="bg-blue-50/70 dark:bg-blue-950/30 font-bold">
-      <td colspan="5" class="px-4 py-3 text-right">GRAND TOTAL ANGGARAN (RAB)</td>
-      <td class="px-4 py-3 text-right text-blue-600 dark:text-blue-400">${formatRupiah(grandTotal)}</td>
-      <td></td>
-    </tr>
-  `;
-}
-
-function deleteRAB(id) {
-  DB.rab = DB.rab.filter(r => r.id !== id);
-  saveDB();
-  refreshRABTable();
-}
-
-function initSignaturePad() {
-  signaturePadCanvas = document.getElementById("sigCanvas");
-  if (!signaturePadCanvas) return;
-  signaturePadCtx = signaturePadCanvas.getContext("2d");
-  signaturePadCtx.strokeStyle = "#0f172a";
-  signaturePadCtx.lineWidth = 2.5;
-  signaturePadCtx.lineCap = "round";
-
-  const getPos = (e) => {
-    const rect = signaturePadCanvas.getBoundingClientRect();
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    return {
-      x: (clientX - rect.left) * (signaturePadCanvas.width / rect.width),
-      y: (clientY - rect.top) * (signaturePadCanvas.height / rect.height)
-    };
-  };
-
-  const start = (e) => { isDrawing = true; const p = getPos(e); signaturePadCtx.beginPath(); signaturePadCtx.moveTo(p.x, p.y); };
-  const move = (e) => { if (!isDrawing) return; e.preventDefault(); const p = getPos(e); signaturePadCtx.lineTo(p.x, p.y); signaturePadCtx.stroke(); };
-  const end = () => { isDrawing = false; };
-
-  signaturePadCanvas.addEventListener("mousedown", start);
-  signaturePadCanvas.addEventListener("mousemove", move);
-  signaturePadCanvas.addEventListener("mouseup", end);
-  signaturePadCanvas.addEventListener("touchstart", start);
-  signaturePadCanvas.addEventListener("touchmove", move);
-  signaturePadCanvas.addEventListener("touchend", end);
-}
-
-function clearSignature() {
-  if (signaturePadCtx) signaturePadCtx.clearRect(0, 0, signaturePadCanvas.width, signaturePadCanvas.height);
-}
-
-function saveSignatureToRAB() {
-  const prjId = document.getElementById("rabProjectId").value;
-  const sig = signaturePadCanvas.toDataURL();
-  const mgr = document.getElementById("rabManagerName").value;
-  DB.rab.forEach(r => {
-    if (r.projectId === prjId) {
-      r.signatureData = sig;
-      r.managerName = mgr;
-    }
-  });
-  saveDB();
-  showToast("Tanda tangan Manager Proyek berhasil disematkan pada RAB!");
-}
-
-function printRAB(mode) {
-  const prjId = document.getElementById("rabProjectId").value;
-  const prj = DB.projects.find(p => p.id === prjId) || { nama: "Proyek", jenis: "-" };
-  const items = DB.rab.filter(r => r.projectId === prjId);
-  const grandTotal = items.reduce((a, b) => a + Number(b.total), 0);
-  const mgr = items[0]?.managerName || document.getElementById("rabManagerName").value;
-  const sig = items[0]?.signatureData || signaturePadCanvas.toDataURL();
-
-  let html = "";
-  if (mode.startsWith("thermal")) {
-    html = `
-      <div style="text-align:center; border-bottom:1px dashed #000; padding-bottom:6px; margin-bottom:6px;">
-        <strong>${DB.settings.companyName}</strong><br>
-        <span>RENCANA ANGGARAN BELANJA</span><br>
-        <small>${prj.nama}</small>
-      </div>
-      ${items.map(i => `
-        <div style="margin-bottom:4px; border-bottom:1px dotted #ccc; padding-bottom:2px;">
-          <div><strong>${i.kode} - ${i.uraian}</strong></div>
-          <div style="display:flex; justify-content:space-between;">
-            <span>${i.volume} ${i.satuan} x ${Number(i.hargaSatuan).toLocaleString('id-ID')}</span>
-            <span>${Number(i.total).toLocaleString('id-ID')}</span>
-          </div>
-        </div>
-      `).join("")}
-      <div style="border-top:1px dashed #000; margin-top:6px; padding-top:4px; display:flex; justify-content:space-between;">
-        <strong>TOTAL RAB:</strong>
-        <strong>${formatRupiah(grandTotal)}</strong>
-      </div>
-      <div style="text-align:center; margin-top:12px;">
-        <small>Disetujui Manager Proyek,</small><br>
-        <img src="${sig}" style="max-height:45px; margin:4px auto;"><br>
-        <strong><u>${mgr}</u></strong>
-      </div>
-    `;
-  } else {
-    html = `
-      <div style="padding:20px;">
-        <div style="border-bottom:2px solid #000; padding-bottom:10px; margin-bottom:15px;">
-          <h2 style="margin:0; font-size:18px;">${DB.settings.companyName}</h2>
-          <p style="margin:2px 0; font-size:11px;">${DB.settings.companyAddress} | Telp: ${DB.settings.companyPhone}</p>
-        </div>
-        <h3 style="text-align:center; margin:10px 0;">RENCANA ANGGARAN BELANJA (RAB)</h3>
-        <table style="width:100%; font-size:12px; margin-bottom:12px;">
-          <tr><td width="130">Nama Proyek</td><td>: <strong>${prj.nama}</strong></td></tr>
-          <tr><td>Jenis Proyek</td><td>: ${prj.jenis}</td></tr>
-          <tr><td>Lokasi</td><td>: ${prj.lokasi || '-'}</td></tr>
-        </table>
-        <table border="1" cellspacing="0" cellpadding="6" style="width:100%; border-collapse:collapse; font-size:11px;">
-          <thead style="background:#f1f5f9;">
-            <tr><th>Kode</th><th>Uraian Pekerjaan</th><th>Vol</th><th>Sat</th><th>Harga Satuan</th><th>Jumlah Harga</th></tr>
-          </thead>
-          <tbody>
-            ${items.map(i => `
-              <tr>
-                <td>${i.kode}</td><td>${i.uraian}</td><td align="right">${i.volume}</td><td align="center">${i.satuan}</td>
-                <td align="right">${formatRupiah(i.hargaSatuan)}</td><td align="right">${formatRupiah(i.total)}</td>
-              </tr>
-            `).join("")}
-            <tr>
-              <td colspan="5" align="right"><strong>TOTAL ANGGARAN BELANJA</strong></td>
-              <td align="right"><strong>${formatRupiah(grandTotal)}</strong></td>
-            </tr>
-          </tbody>
-        </table>
-        <div style="margin-top:30px; display:flex; justify-content:flex-end;">
-          <div style="text-align:center; width:220px;">
-            <p style="margin-bottom:5px;">Menyetujui,<br>Manager Proyek</p>
-            <img src="${sig}" style="height:65px; margin:0 auto;">
-            <p style="margin-top:5px;"><strong><u>${mgr}</u></strong></p>
-          </div>
-        </div>
-      </div>
-    `;
-  }
-  triggerPrint(html, mode);
-}
-
-function triggerPrint(htmlContent, mode) {
-  const printArea = document.getElementById("printArea");
-  printArea.innerHTML = htmlContent;
-  printArea.classList.remove("hidden");
-  document.body.classList.remove("print-a4", "print-thermal-80", "print-thermal-58");
-  document.body.classList.add("print-" + mode);
-  setTimeout(() => {
-    window.print();
-    printArea.classList.add("hidden");
-  }, 300);
-}
-
-/**
- * ============================================================================
- * 3. MENU PEKERJAAN BERDASARKAN PROYEK
- * ============================================================================
- */
-function renderPekerjaan(area) {
-  area.innerHTML = `
-    <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 mb-6">
-      <h3 class="font-bold text-base mb-4">Tambah Item Pekerjaan Proyek</h3>
-      <form id="formTask" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-          <label class="block text-xs font-semibold mb-1">Proyek</label>
-          <select id="tskPrj" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
-            ${DB.projects.map(p => `<option value="${p.id}">${p.nama}</option>`).join("")}
-          </select>
-        </div>
-        <div>
-          <label class="block text-xs font-semibold mb-1">Judul Pekerjaan</label>
-          <input type="text" id="tskJudul" required placeholder="Pemasangan Atap Baja Ringan" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold mb-1">Penanggung Jawab (PIC)</label>
-          <input type="text" id="tskPic" placeholder="Nama Mandor / Teknisi" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold mb-1">Target Selesai (Deadline)</label>
-          <input type="date" id="tskDeadline" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold mb-1">Progres (%)</label>
-          <input type="number" min="0" max="100" value="0" id="tskProgress" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
-        </div>
-        <div class="flex items-end">
-          <button type="submit" class="w-full py-2 bg-blue-600 text-white font-semibold rounded-xl text-sm">Simpan Pekerjaan</button>
-        </div>
-      </form>
-    </div>
-
-    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-x-auto">
-      <table class="w-full text-sm text-left">
-        <thead class="bg-slate-100 dark:bg-slate-800 text-xs uppercase">
-          <tr>
-            <th class="px-4 py-3">Proyek</th>
-            <th class="px-4 py-3">Item Pekerjaan</th>
-            <th class="px-4 py-3">PIC</th>
-            <th class="px-4 py-3">Deadline</th>
-            <th class="px-4 py-3">Progres</th>
-            <th class="px-4 py-3 text-center">Update</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
-          ${DB.tasks.map(t => {
-            const prjName = DB.projects.find(p => p.id === t.projectId)?.nama || "-";
-            return `
-              <tr>
-                <td class="px-4 py-3 font-medium">${prjName}</td>
-                <td class="px-4 py-3">${t.judul}</td>
-                <td class="px-4 py-3">${t.pic}</td>
-                <td class="px-4 py-3">${t.deadline || '-'}</td>
-                <td class="px-4 py-3">
-                  <div class="flex items-center gap-2">
-                    <input type="range" min="0" max="100" value="${t.progress}" onchange="updateTaskProgress('${t.id}', this.value)" class="w-24">
-                    <span class="font-bold text-xs">${t.progress}%</span>
-                  </div>
-                </td>
-                <td class="px-4 py-3 text-center">
-                  <button onclick="deleteTask('${t.id}')" class="text-rose-500 text-xs">Hapus</button>
-                </td>
-              </tr>
-            `;
-          }).join("")}
-        </tbody>
-      </table>
-    </div>
-  `;
-
-  document.getElementById("formTask").addEventListener("submit", (e) => {
-    e.preventDefault();
-    const prog = Number(document.getElementById("tskProgress").value);
-    DB.tasks.push({
-      id: generateId("TSK"),
-      projectId: document.getElementById("tskPrj").value,
-      judul: document.getElementById("tskJudul").value,
-      pic: document.getElementById("tskPic").value,
-      deadline: document.getElementById("tskDeadline").value,
-      progress: prog,
-      status: prog === 100 ? "Selesai" : "Proses"
-    });
-    saveDB();
-    renderPekerjaan(area);
-    showToast("Pekerjaan ditambahkan!");
-  });
-}
-
-function updateTaskProgress(id, val) {
-  const t = DB.tasks.find(x => x.id === id);
-  if (t) { t.progress = Number(val); t.status = t.progress === 100 ? "Selesai" : "Proses"; saveDB(); renderPekerjaan(document.getElementById("contentArea")); }
-}
-function deleteTask(id) { DB.tasks = DB.tasks.filter(x => x.id !== id); saveDB(); renderPekerjaan(document.getElementById("contentArea")); }
-
-/**
- * ============================================================================
- * 4. MENU PEKERJA & ABSENSI BERDASARKAN PROYEK
- * ============================================================================
- */
-function renderPekerja(area) {
-  const today = new Date().toISOString().split("T")[0];
-  area.innerHTML = `
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-      <!-- FORM TAMBAH PEKERJA -->
-      <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800">
-        <h3 class="font-bold text-base mb-4">Registrasi Pekerja Proyek</h3>
-        <form id="formWorker" class="space-y-3">
-          <select id="wrkPrj" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
-            ${DB.projects.map(p => `<option value="${p.id}">${p.nama}</option>`).join("")}
-          </select>
-          <div class="grid grid-cols-2 gap-3">
-            <input type="text" id="wrkNama" placeholder="Nama Pekerja" required class="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
-            <input type="text" id="wrkJabatan" placeholder="Jabatan (Tukang/Mandor)" required class="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
-          </div>
-          <div class="grid grid-cols-2 gap-3">
-            <input type="number" id="wrkUpah" placeholder="Upah Harian (Rp)" required class="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
-            <input type="text" id="wrkTelp" placeholder="No. HP / WA" class="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
-          </div>
-          <button type="submit" class="w-full py-2.5 bg-blue-600 text-white font-semibold rounded-xl text-sm">+ Simpan Data Pekerja</button>
-        </form>
-      </div>
-
-      <!-- FORM ABSENSI HARIAN -->
-      <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800">
-        <h3 class="font-bold text-base mb-4">Input Absensi Harian Pekerja</h3>
-        <form id="formAtt" class="space-y-3">
-          <select id="attWorker" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
-            ${DB.workers.map(w => {
-              const p = DB.projects.find(x => x.id === w.projectId)?.nama || "";
-              return `<option value="${w.id}">${w.nama} (${w.jabatan} - ${p})</option>`;
-            }).join("")}
-          </select>
-          <div class="grid grid-cols-3 gap-3">
-            <input type="date" id="attTanggal" value="${today}" required class="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
-            <select id="attStatus" class="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
-              <option>Hadir</option>
-              <option>Setengah Hari</option>
-              <option>Izin / Sakit</option>
-              <option>Alpha</option>
-            </select>
-            <input type="number" id="attLembur" value="0" min="0" placeholder="Lembur (Jam)" class="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
-          </div>
-          <input type="text" id="attCatatan" placeholder="Catatan pekerjaan / lembur" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
-          <button type="submit" class="w-full py-2.5 bg-emerald-600 text-white font-semibold rounded-xl text-sm">Catat Absensi</button>
-        </form>
-      </div>
-    </div>
-
-    <!-- REKAP ABSENSI & ESTIMASI UPAH -->
-    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-x-auto">
-      <div class="p-4 border-b border-slate-200 dark:border-slate-800 font-bold text-sm">Log Kehadiran & Estimasi Upah</div>
-      <table class="w-full text-sm text-left">
-        <thead class="bg-slate-100 dark:bg-slate-800 text-xs uppercase">
-          <tr>
-            <th class="px-4 py-3">Tanggal</th>
-            <th class="px-4 py-3">Nama Pekerja</th>
-            <th class="px-4 py-3">Status</th>
-            <th class="px-4 py-3">Lembur</th>
-            <th class="px-4 py-3 text-right">Estimasi Upah</th>
-            <th class="px-4 py-3">Catatan</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
-          ${DB.attendance.slice().reverse().map(a => {
-            const w = DB.workers.find(x => x.id === a.workerId);
-            const baseWage = w ? Number(w.upahHarian) : 0;
-            const factor = a.status === "Hadir" ? 1 : (a.status === "Setengah Hari" ? 0.5 : 0);
-            const totalWage = (baseWage * factor) + (Number(a.lemburJam || 0) * (baseWage / 8));
-            return `
-              <tr>
-                <td class="px-4 py-3">${a.tanggal}</td>
-                <td class="px-4 py-3 font-medium">${a.workerName}</td>
-                <td class="px-4 py-3"><span class="px-2 py-0.5 rounded text-xs font-semibold ${a.status === 'Hadir' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">${a.status}</span></td>
-                <td class="px-4 py-3">${a.lemburJam} Jam</td>
-                <td class="px-4 py-3 text-right font-semibold">${formatRupiah(Math.round(totalWage))}</td>
-                <td class="px-4 py-3 text-slate-500">${a.catatan || '-'}</td>
-              </tr>
-            `;
-          }).join("")}
-        </tbody>
-      </table>
-    </div>
-  `;
-
-  document.getElementById("formWorker").addEventListener("submit", (e) => {
-    e.preventDefault();
-    DB.workers.push({
-      id: generateId("WRK"),
-      projectId: document.getElementById("wrkPrj").value,
-      nama: document.getElementById("wrkNama").value,
-      jabatan: document.getElementById("wrkJabatan").value,
-      upahHarian: Number(document.getElementById("wrkUpah").value),
-      telepon: document.getElementById("wrkTelp").value,
-      status: "Aktif"
-    });
-    saveDB();
-    renderPekerja(area);
-    showToast("Pekerja berhasil didaftarkan!");
-  });
-
-  document.getElementById("formAtt").addEventListener("submit", (e) => {
-    e.preventDefault();
-    const wId = document.getElementById("attWorker").value;
-    const w = DB.workers.find(x => x.id === wId);
-    if (!w) return;
-    DB.attendance.push({
-      id: generateId("ATT"),
-      projectId: w.projectId,
-      workerId: w.id,
-      workerName: w.nama,
-      tanggal: document.getElementById("attTanggal").value,
-      status: document.getElementById("attStatus").value,
-      lemburJam: Number(document.getElementById("attLembur").value),
-      catatan: document.getElementById("attCatatan").value
-    });
-    saveDB();
-    renderPekerja(area);
-    showToast("Absensi tercatat!");
-  });
-}
-
-/**
- * ============================================================================
- * 5. MENU ARUS KAS PROYEK
- * ============================================================================
- */
-function renderKas(area) {
-  const today = new Date().toISOString().split("T")[0];
-  area.innerHTML = `
-    <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 mb-6">
-      <h3 class="font-bold text-base mb-4">Catat Transaksi Arus Kas Proyek</h3>
-      <form id="formKas" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-          <label class="block text-xs font-semibold mb-1">Proyek</label>
-          <select id="kasPrj" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
-            ${DB.projects.map(p => `<option value="${p.id}">${p.nama}</option>`).join("")}
-          </select>
-        </div>
-        <div>
-          <label class="block text-xs font-semibold mb-1">Tanggal</label>
-          <input type="date" id="kasTanggal" value="${today}" required class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold mb-1">Jenis Arus Kas</label>
-          <select id="kasJenis" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
-            <option value="Masuk">Kas Masuk (Pemasukan / Termin)</option>
-            <option value="Keluar">Kas Keluar (Belanja / Upah)</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-xs font-semibold mb-1">Kategori</label>
-          <select id="kasKategori" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
-            <option>Termin / DP Klien</option>
-            <option>Belanja Material</option>
-            <option>Upah Tenaga Kerja</option>
-            <option>Sewa Alat Berat</option>
-            <option>Operasional & Konsumsi</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-xs font-semibold mb-1">Nominal (Rp)</label>
-          <input type="number" id="kasNominal" required placeholder="5000000" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold mb-1">Metode Pembayaran</label>
-          <select id="kasMetode" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
-            <option>Transfer Bank</option>
-            <option>Tunai / Petty Cash</option>
-            <option>QRIS / E-Wallet</option>
-          </select>
-        </div>
-        <div class="md:col-span-2">
-          <label class="block text-xs font-semibold mb-1">Keterangan Transaksi</label>
-          <input type="text" id="kasKet" required placeholder="Pembelian 100 sak semen Gresik" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
-        </div>
-        <div class="flex items-end">
-          <button type="submit" class="w-full py-2 bg-blue-600 text-white font-semibold rounded-xl text-sm">Simpan Transaksi</button>
-        </div>
-      </form>
-    </div>
-
-    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-x-auto">
-      <table class="w-full text-sm text-left">
-        <thead class="bg-slate-100 dark:bg-slate-800 text-xs uppercase">
-          <tr>
-            <th class="px-4 py-3">Tanggal</th>
-            <th class="px-4 py-3">Proyek</th>
-            <th class="px-4 py-3">Kategori</th>
-            <th class="px-4 py-3">Keterangan</th>
-            <th class="px-4 py-3 text-right">Masuk</th>
-            <th class="px-4 py-3 text-right">Keluar</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
-          ${DB.cashflow.slice().reverse().map(c => {
-            const pName = DB.projects.find(p => p.id === c.projectId)?.nama || "-";
-            return `
-              <tr>
-                <td class="px-4 py-3">${c.tanggal}</td>
-                <td class="px-4 py-3 font-medium">${pName}</td>
-                <td class="px-4 py-3">${c.kategori}</td>
-                <td class="px-4 py-3">${c.keterangan}</td>
-                <td class="px-4 py-3 text-right text-emerald-600 font-semibold">${c.jenis === 'Masuk' ? formatRupiah(c.nominal) : '-'}</td>
-                <td class="px-4 py-3 text-right text-rose-500 font-semibold">${c.jenis === 'Keluar' ? formatRupiah(c.nominal) : '-'}</td>
-              </tr>
-            `;
-          }).join("")}
-        </tbody>
-      </table>
-    </div>
-  `;
-
-  document.getElementById("formKas").addEventListener("submit", (e) => {
-    e.preventDefault();
-    DB.cashflow.push({
-      id: generateId("KAS"),
-      projectId: document.getElementById("kasPrj").value,
-      tanggal: document.getElementById("kasTanggal").value,
-      jenis: document.getElementById("kasJenis").value,
-      kategori: document.getElementById("kasKategori").value,
-      nominal: Number(document.getElementById("kasNominal").value),
-      metode: document.getElementById("kasMetode").value,
-      keterangan: document.getElementById("kasKet").value
-    });
-    saveDB();
-    renderKas(area);
-    showToast("Transaksi arus kas tersimpan!");
-  });
-}
-
-/**
- * ============================================================================
- * 6. MENU LAPORAN PROYEK & BERBAGAI JENIS PRINT (PDF A4, THERMAL 80MM, 58MM)
- * ============================================================================
- */
-function renderLaporan(area) {
-  area.innerHTML = `
-    <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 mb-6">
-      <h3 class="font-bold text-base mb-4">Generator Laporan Proyek Multi-Format</h3>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
-        <div>
-          <label class="block text-xs font-semibold mb-1">Pilih Proyek</label>
-          <select id="lapPrj" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
-            ${DB.projects.map(p => `<option value="${p.id}">${p.nama}</option>`).join("")}
-          </select>
-        </div>
-        <div>
-          <label class="block text-xs font-semibold mb-1">Jenis Laporan</label>
-          <select id="lapJenis" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
-            <option value="lengkap">Laporan Eksekutif Lengkap (Foto + RAB + Kas + Progres)</option>
-            <option value="kas">Laporan Arus Kas & Laba/Rugi Proyek</option>
-            <option value="absensi">Laporan Rekap Pekerja & Absensi</option>
-          </select>
-        </div>
-        <div class="flex items-end gap-2">
-          <button onclick="generateAndPrintReport('a4')" class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1">
-            <i data-lucide="file-text" class="w-4 h-4"></i> PDF / A4
-          </button>
-          <button onclick="generateAndPrintReport('thermal-80')" class="py-2.5 px-3 bg-slate-800 text-white rounded-xl text-xs font-semibold">80mm</button>
-          <button onclick="generateAndPrintReport('thermal-58')" class="py-2.5 px-3 bg-slate-700 text-white rounded-xl text-xs font-semibold">58mm</button>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-function generateAndPrintReport(mode) {
-  const prjId = document.getElementById("lapPrj").value;
-  const jenis = document.getElementById("lapJenis").value;
-  const prj = DB.projects.find(p => p.id === prjId);
-  const kas = DB.cashflow.filter(c => c.projectId === prjId);
-  const masuk = kas.filter(c => c.jenis === "Masuk").reduce((a, b) => a + Number(b.nominal), 0);
-  const keluar = kas.filter(c => c.jenis === "Keluar").reduce((a, b) => a + Number(b.nominal), 0);
-  const rabTotal = DB.rab.filter(r => r.projectId === prjId).reduce((a, b) => a + Number(b.total), 0);
-
-  let html = "";
-  if (mode.startsWith("thermal")) {
-    html = `
-      <div style="text-align:center; border-bottom:1px dashed #000; padding-bottom:5px; margin-bottom:6px;">
-        <strong>${DB.settings.companyName}</strong><br>
-        <span>LAPORAN PROYEK</span><br>
-        <small>${prj.nama}</small>
-      </div>
-      <div>Status: <strong>${prj.status}</strong></div>
-      <div>Total RAB: ${formatRupiah(rabTotal)}</div>
-      <div>Kas Masuk: ${formatRupiah(masuk)}</div>
-      <div>Kas Keluar: ${formatRupiah(keluar)}</div>
-      <div style="border-top:1px dashed #000; margin-top:5px; padding-top:5px;">
-        <strong>Saldo Kas: ${formatRupiah(masuk - keluar)}</strong>
-      </div>
-      <div style="text-align:center; margin-top:10px; font-size:9px;">
-        Dicetak: ${new Date().toLocaleString('id-ID')}
-      </div>
-    `;
-  } else {
-    html = `
-      <div style="padding:20px;">
-        <div style="border-bottom:2px solid #000; padding-bottom:10px; margin-bottom:15px;">
-          <h2 style="margin:0;">${DB.settings.companyName}</h2>
-          <p style="margin:2px 0; font-size:11px;">${DB.settings.companyAddress} | ${DB.settings.companyPhone}</p>
-        </div>
-        <h3 style="text-align:center;">LAPORAN PROYEK: ${prj.nama.toUpperCase()}</h3>
-        <p style="font-size:12px;">Jenis: ${prj.jenis} | Lokasi: ${prj.lokasi || '-'} | Status: <strong>${prj.status}</strong></p>
-
-        ${jenis === 'lengkap' ? `
-          <h4>1. Dokumentasi Visual (Before & After)</h4>
-          <table border="1" cellspacing="0" cellpadding="8" style="width:100%; border-collapse:collapse; text-align:center; margin-bottom:15px;">
-            <tr><th>KONDISI AWAL (BEFORE)</th><th>HASIL AKHIR (AFTER)</th></tr>
-            <tr>
-              <td width="50%">${prj.fotoBefore ? `<img src="${prj.fotoBefore}" style="max-height:160px; margin:auto;">` : 'Tidak ada foto'}</td>
-              <td width="50%">${prj.fotoAfter ? `<img src="${prj.fotoAfter}" style="max-height:160px; margin:auto;">` : 'Tidak ada foto'}</td>
-            </tr>
-          </table>
-        ` : ''}
-
-        <h4>Ringkasan Finansial & Arus Kas</h4>
-        <table border="1" cellspacing="0" cellpadding="6" style="width:100%; border-collapse:collapse; font-size:11px; margin-bottom:15px;">
-          <tr><td>Total Rencana Anggaran (RAB)</td><td align="right"><strong>${formatRupiah(rabTotal)}</strong></td></tr>
-          <tr><td>Total Pemasukan Proyek</td><td align="right">${formatRupiah(masuk)}</td></tr>
-          <tr><td>Total Pengeluaran Proyek</td><td align="right">${formatRupiah(keluar)}</td></tr>
-          <tr style="background:#f1f5f9;"><td><strong>SALDO KAS BERSIH</strong></td><td align="right"><strong>${formatRupiah(masuk - keluar)}</strong></td></tr>
-        </table>
-
-        <h4>Detail Transaksi Kas</h4>
-        <table border="1" cellspacing="0" cellpadding="5" style="width:100%; border-collapse:collapse; font-size:11px;">
-          <thead><tr><th>Tanggal</th><th>Kategori</th><th>Keterangan</th><th>Jenis</th><th>Nominal</th></tr></thead>
-          <tbody>
-            ${kas.map(k => `<tr><td>${k.tanggal}</td><td>${k.kategori}</td><td>${k.keterangan}</td><td>${k.jenis}</td><td align="right">${formatRupiah(k.nominal)}</td></tr>`).join("")}
-          </tbody>
-        </table>
-      </div>
-    `;
-  }
-  triggerPrint(html, mode);
-}
-
-/**
- * ============================================================================
- * 7. MENU PENGATURAN ADMINISTRATOR USER & HAK AKSES
- * ============================================================================
- */
-function renderUsers(area) {
-  const allModules = [
-    { id: "proyek", label: "1. Proyek" }, { id: "rab", label: "2. RAB" },
-    { id: "pekerjaan", label: "3. Pekerjaan" }, { id: "pekerja", label: "4. Pekerja" },
-    { id: "kas", label: "5. Arus Kas" }, { id: "laporan", label: "6. Laporan" },
-    { id: "users", label: "7. Admin User" }, { id: "settings", label: "8. Sistem" },
-    { id: "backup", label: "9. Backup" }
-  ];
-
-  area.innerHTML = `
-    <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 mb-6">
-      <h3 class="font-bold text-base mb-4">Tambah User & Kewenangan Modul</h3>
-      <form id="formUser" class="space-y-4">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <input type="text" id="usrNama" placeholder="Nama Lengkap" required class="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
-          <input type="text" id="usrUsername" placeholder="Username Login" required class="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
-          <input type="text" id="usrPassword" placeholder="Password" required class="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
-          <input type="text" id="usrRole" placeholder="Jabatan (Misal: Admin Lapangan)" required class="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
-        </div>
-        <div>
-          <label class="block text-xs font-bold mb-2">Centang Hak Akses Menu:</label>
-          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
-            ${allModules.map(m => `
-              <label class="flex items-center gap-2 text-xs bg-slate-50 dark:bg-slate-800 p-2 rounded-lg border border-slate-200 dark:border-slate-700">
-                <input type="checkbox" name="hakAkses" value="${m.id}" checked> ${m.label}
-              </label>
-            `).join("")}
-          </div>
-        </div>
-        <button type="submit" class="px-6 py-2.5 bg-blue-600 text-white font-semibold rounded-xl text-sm">Simpan User Baru</button>
-      </form>
-    </div>
-
-    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-x-auto">
-      <table class="w-full text-sm text-left">
-        <thead class="bg-slate-100 dark:bg-slate-800 text-xs uppercase">
-          <tr><th class="px-4 py-3">Nama</th><th class="px-4 py-3">Username</th><th class="px-4 py-3">Role</th><th class="px-4 py-3">Kewenangan</th><th class="px-4 py-3">Aksi</th></tr>
-        </thead>
-        <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
-          ${DB.users.map(u => `
-            <tr>
-              <td class="px-4 py-3 font-semibold">${u.nama}</td>
-              <td class="px-4 py-3 font-mono text-xs">${u.username}</td>
-              <td class="px-4 py-3">${u.role}</td>
-              <td class="px-4 py-3 text-xs">${(u.hakAkses || []).join(", ")}</td>
-              <td class="px-4 py-3">
-                ${u.username !== 'admin' ? `<button onclick="deleteUser('${u.id}')" class="text-rose-500 text-xs">Hapus</button>` : '<span class="text-xs text-slate-400">Default</span>'}
-              </td>
-            </tr>
-          `).join("")}
-        </tbody>
-      </table>
-    </div>
-  `;
-
-  document.getElementById("formUser").addEventListener("submit", (e) => {
-    e.preventDefault();
-    const checked = Array.from(document.querySelectorAll('input[name="hakAkses"]:checked')).map(cb => cb.value);
-    DB.users.push({
-      id: generateId("USR"),
-      nama: document.getElementById("usrNama").value,
-      username: document.getElementById("usrUsername").value,
-      password: document.getElementById("usrPassword").value,
-      role: document.getElementById("usrRole").value,
-      hakAkses: ["dashboard", ...checked],
-      status: "Aktif"
-    });
-    saveDB();
-    renderUsers(area);
-    showToast("User baru & hak akses tersimpan!");
-  });
-}
-
-function deleteUser(id) { DB.users = DB.users.filter(u => u.id !== id); saveDB(); renderUsers(document.getElementById("contentArea")); }
-
-/**
- * ============================================================================
- * 8. MENU PENGATURAN SISTEM, PERUSAHAAN & APLIKASI
- * ============================================================================
- */
-function renderSettings(area) {
-  area.innerHTML = `
-    <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 max-w-3xl">
-      <h3 class="font-bold text-base mb-4">Konfigurasi Perusahaan, Aplikasi & Google Apps Script</h3>
-      <form id="formSettings" class="space-y-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-xs font-semibold mb-1">Nama Aplikasi</label>
-            <input type="text" id="setAppName" value="${DB.settings.appName}" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold mb-1">Simbol Mata Uang</label>
-            <input type="text" id="setCurrency" value="${DB.settings.currency}" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
-          </div>
-        </div>
-        <div>
-          <label class="block text-xs font-semibold mb-1">Nama Perusahaan</label>
-          <input type="text" id="setCompName" value="${DB.settings.companyName}" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold mb-1">Alamat Perusahaan (Tampil di Kop Surat / Print)</label>
-          <input type="text" id="setCompAddr" value="${DB.settings.companyAddress}" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold mb-1">Kontak & Email Perusahaan</label>
-          <input type="text" id="setCompPhone" value="${DB.settings.companyPhone}" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm">
-        </div>
-        <div class="pt-3 border-t border-slate-200 dark:border-slate-800">
-          <label class="block text-xs font-bold text-blue-600 mb-1">URL Web App Google Apps Script (code.gs)</label>
-          <input type="url" id="setGasUrl" value="${DB.settings.gasUrl || ''}" placeholder="https://script.google.com/macros/s/xxxxx/exec" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-mono">
-          <p class="text-[11px] text-slate-400 mt-1">Tempel URL deployment Web App dari file <code>code.gs</code> untuk sinkronisasi otomatis ke Google Sheets & Google Drive.</p>
-        </div>
-        <div class="flex flex-wrap gap-3 pt-2">
-          <button type="submit" class="px-6 py-2.5 bg-blue-600 text-white font-semibold rounded-xl text-sm">Simpan Pengaturan</button>
-          <button type="button" onclick="pullFromCloud()" class="px-5 py-2.5 bg-emerald-600 text-white font-semibold rounded-xl text-sm">Tarik Data dari Google Sheets</button>
-        </div>
-      </form>
-    </div>
-  `;
-
-  document.getElementById("formSettings").addEventListener("submit", (e) => {
-    e.preventDefault();
-    DB.settings.appName = document.getElementById("setAppName").value;
-    DB.settings.currency = document.getElementById("setCurrency").value;
-    DB.settings.companyName = document.getElementById("setCompName").value;
-    DB.settings.companyAddress = document.getElementById("setCompAddr").value;
-    DB.settings.companyPhone = document.getElementById("setCompPhone").value;
-    DB.settings.gasUrl = document.getElementById("setGasUrl").value.trim();
-    saveDB();
-    showToast("Pengaturan sistem & perusahaan diperbarui!");
-  });
-}
-
-/**
- * ============================================================================
- * 9. MENU BACKUP & RESTORE DATA
- * ============================================================================
- */
-function renderBackup(area) {
-  area.innerHTML = `
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
-      <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800">
-        <div class="p-3 bg-blue-100 dark:bg-blue-900/30 text-blue-600 rounded-xl w-fit mb-4">
-          <i data-lucide="download" class="w-6 h-6"></i>
-        </div>
-        <h3 class="font-bold text-lg mb-2">Backup Database (.JSON)</h3>
-        <p class="text-sm text-slate-500 mb-5">Unduh seluruh data proyek, foto before/after, RAB, pekerja, absensi, arus kas, dan pengaturan ke dalam satu file cadangan.</p>
-        <button onclick="downloadBackup()" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl text-sm">Unduh File Backup Sekarang</button>
-      </div>
-
-      <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800">
-        <div class="p-3 bg-amber-100 dark:bg-amber-900/30 text-amber-600 rounded-xl w-fit mb-4">
-          <i data-lucide="upload" class="w-6 h-6"></i>
-        </div>
-        <h3 class="font-bold text-lg mb-2">Restore Database</h3>
-        <p class="text-sm text-slate-500 mb-4">Pilih file backup <code>.json</code> untuk memulihkan seluruh data aplikasi.</p>
-        <input type="file" id="restoreFile" accept=".json" class="block w-full text-xs mb-4">
-        <button onclick="restoreBackup()" class="w-full py-3 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-xl text-sm">Pulihkan Data</button>
-      </div>
-    </div>
-  `;
-}
-
-function downloadBackup() {
-  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(DB, null, 2));
-  const a = document.createElement("a");
-  a.href = dataStr;
-  a.download = `Backup_ProManage_${new Date().toISOString().split("T")[0]}.json`;
-  a.click();
-  showToast("File backup berhasil diunduh!");
-}
-
-function restoreBackup() {
-  const fileInput = document.getElementById("restoreFile");
-  if (!fileInput.files.length) return alert("Pilih file backup .json terlebih dahulu!");
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    try {
-      const parsed = JSON.parse(e.target.result);
-      if (parsed.projects && parsed.settings) {
-        DB = parsed;
-        saveDB();
-        showToast("Database berhasil dipulihkan!");
-        navigate("dashboard");
-      } else {
-        alert("Format file backup tidak valid!");
-      }
-    } catch (err) {
-      alert("Gagal membaca file backup.");
-    }
-  };
-  reader.readAsText(fileInput.files[0]);
-}
-
-// Start App
-initApp();
-</script>
-</body>
-</html>
+        <div class="md:col-span-1 border border-dashed border-slate-300 dark:border-slate-7
