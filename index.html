@@ -286,7 +286,7 @@ body{background:#fff;color:#000;}
 </div>
 <div class="btn-group">
 <button class="btn btn-primary" onclick="saveSystemSettings()"><i class="fas fa-save"></i> Simpan</button>
-<button class="btn btn-info" onclick="pullFromSheets().then(()=>{loadAllData();showToast('Data ditarik dari server','success');})"><i class="fas fa-sync"></i> Tarik Data Server</button>
+<button class="btn btn-info" onclick="manualPull()"><i class="fas fa-sync"></i> Tarik Data Server</button>
 </div>
 </div>
 </div>
@@ -427,17 +427,21 @@ body{background:#fff;color:#000;}
 
 <script>
 // ============================================================
-// KONFIGURASI & STATE
+// KONFIGURASI
 // ============================================================
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbybzwqFntG2opfZ3gK6pYqeYGRsoSRQLM1JIKOi04VkqmS0Wq75lK3aHIJ1HWpPYZ4gZQ/exec';
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyaDQIK-Msg5VtNjnSDexYMkUDqKzne-dsq8F_EMnDU2ulCPle5jt9v5qDhtEqqTa7V8Q/exec';
+const DEFAULT_ADMIN = { id: '1', username: 'admin', password: '418899', fullname: 'Administrator', role: 'admin', status: 'Aktif' };
 
+// ============================================================
+// STATE
+// ============================================================
 let state = {
     currentUser: null,
     currentSection: 'dashboard',
     theme: localStorage.getItem('theme') || 'light',
     data: {
         projects: [], rab: [], works: [], workers: [],
-        attendance: [], cashflow: [], users: [],
+        attendance: [], cashflow: [], users: [DEFAULT_ADMIN],
         settings: {
             company: { name: 'PT. Konstruksi Jaya', address: 'Jl. Raya No. 123, Jakarta', phone: '021-1234567', email: 'info@konstruksi.com' },
             app: { name: 'Manajemen Proyek', currency: 'IDR' },
@@ -451,7 +455,7 @@ let signatureCanvas, signatureCtx, isDrawing = false;
 let cashflowChart = null;
 
 // ============================================================
-// INDEXEDDB WRAPPER
+// INDEXEDDB
 // ============================================================
 const DB_NAME = 'ManajemenProyekDB';
 const DB_VERSION = 1;
@@ -470,7 +474,6 @@ function openDB() {
         req.onerror = (e) => reject(e.target.error);
     });
 }
-
 async function dbGet(key) {
     const d = await openDB();
     return new Promise((resolve, reject) => {
@@ -480,7 +483,6 @@ async function dbGet(key) {
         req.onerror = () => reject(req.error);
     });
 }
-
 async function dbSet(key, value) {
     const d = await openDB();
     return new Promise((resolve, reject) => {
@@ -495,11 +497,8 @@ async function dbSet(key, value) {
 // SYNC ENGINE
 // ============================================================
 const sync = {
-    status: 'idle',
-    pending: false,
-    timer: null,
-    retryDelay: 2000,
-    maxRetryDelay: 60000,
+    status: 'idle', pending: false, timer: null,
+    retryDelay: 2000, maxRetryDelay: 60000,
 
     setStatus(s, text) {
         this.status = s;
@@ -529,24 +528,16 @@ const sync = {
     },
 
     async flush() {
-        if (!navigator.onLine) {
-            this.setStatus('offline');
-            this._scheduleRetry();
-            return;
-        }
-        const url = state.data.settings && state.data.settings.system ? state.data.settings.system.url : '';
-        if (!url || url.includes('GANTI_DENGAN')) {
-            this.setStatus('idle', 'Lokal saja');
-            return;
-        }
+        if (!navigator.onLine) { this.setStatus('offline'); this._scheduleRetry(); return; }
+        const url = (state.data.settings && state.data.settings.system) ? state.data.settings.system.url : '';
+        if (!url || url.includes('GANTI_DENGAN')) { this.setStatus('idle', 'Lokal saja'); return; }
         try {
             this.setStatus('syncing');
             state.data._meta.version = Date.now();
-            const payload = { action: 'sync', data: state.data };
             const res = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify(payload),
+                body: JSON.stringify({ action: 'sync', data: state.data }),
                 redirect: 'follow'
             });
             const json = await res.json();
@@ -556,9 +547,7 @@ const sync = {
                 await dbSet('data', state.data);
                 this.setStatus('idle');
                 this.retryDelay = 2000;
-            } else {
-                throw new Error(json.message || 'Sync gagal');
-            }
+            } else throw new Error(json.message || 'Sync gagal');
         } catch (e) {
             console.warn('Sync error:', e);
             this.setStatus('error');
@@ -574,12 +563,45 @@ const sync = {
 };
 
 // ============================================================
-// SAVE & LOAD
+// MERGE USERS (anti-overwrite password kosong)
+// ============================================================
+function mergeUsers(local, remote) {
+    local = Array.isArray(local) ? local : [];
+    remote = Array.isArray(remote) ? remote : [];
+    // Pastikan admin selalu ada dengan password default jika kosong
+    const ensureAdmin = (arr) => {
+        const admin = arr.find(u => u.username === 'admin');
+        if (admin) {
+            if (!admin.password) admin.password = '418899';
+            if (!admin.status) admin.status = 'Aktif';
+        } else {
+            arr.push({ ...DEFAULT_ADMIN });
+        }
+        return arr;
+    };
+    if (!remote.length) return ensureAdmin(local.length ? local : [{ ...DEFAULT_ADMIN }]);
+    if (!local.length) return ensureAdmin(remote);
+    const merged = remote.map(ru => {
+        const lu = local.find(u => u.username === ru.username);
+        return {
+            ...ru,
+            password: ru.password || (lu ? lu.password : ''),
+            status: ru.status || (lu ? lu.status : 'Aktif')
+        };
+    });
+    // Tambahkan user lokal yang belum ada di remote (mis. baru dibuat offline)
+    local.forEach(lu => {
+        if (!merged.find(u => u.username === lu.username)) merged.push(lu);
+    });
+    return ensureAdmin(merged);
+}
+
+// ============================================================
+// SAVE / LOAD
 // ============================================================
 async function saveData() {
-    try {
-        await dbSet('data', state.data);
-    } catch (e) {
+    try { await dbSet('data', state.data); }
+    catch (e) {
         console.error('DB save error:', e);
         showToast('Gagal menyimpan lokal. Storage penuh?', 'error');
         return;
@@ -588,47 +610,65 @@ async function saveData() {
 }
 
 async function loadInitialData() {
+    // 1. Load dari IndexedDB
     try {
         const cached = await dbGet('data');
         if (cached) {
             state.data = Object.assign(state.data, cached);
             console.log('Loaded from IndexedDB');
         }
-    } catch (e) {
-        console.warn('IndexedDB load error:', e);
+    } catch (e) { console.warn('IndexedDB load error:', e); }
+
+    // 2. Pull dari Sheets (jangan sampai error menghentikan flow)
+    try { await pullFromSheets(); }
+    catch (e) { console.warn('Pull failed:', e); }
+
+    // 3. Jamin users valid
+    if (!Array.isArray(state.data.users) || state.data.users.length === 0) {
+        state.data.users = [{ ...DEFAULT_ADMIN }];
     }
 
-    await pullFromSheets();
-
-    if (!state.data.users || state.data.users.length === 0) {
-        state.data.users = [{ id: '1', username: 'admin', password: '418899', fullname: 'Administrator', role: 'admin', status: 'Aktif' }];
+    // 4. Jamin admin ada dengan password
+    const admin = state.data.users.find(u => u.username === 'admin');
+    if (admin) {
+        if (!admin.password) admin.password = '418899';
+        if (!admin.status) admin.status = 'Aktif';
+    } else {
+        state.data.users.push({ ...DEFAULT_ADMIN });
     }
+
+    // 5. Jamin semua user punya password & status
+    state.data.users.forEach(u => {
+        if (!u.password) u.password = u.username === 'admin' ? '418899' : '123456';
+        if (!u.status) u.status = 'Aktif';
+    });
+
+    // 6. Struktur lain
     if (!state.data.settings) {
         state.data.settings = {
             company: { name: 'PT. Konstruksi Jaya', address: 'Jl. Raya No. 123, Jakarta', phone: '021-1234567', email: 'info@konstruksi.com' },
             app: { name: 'Manajemen Proyek', currency: 'IDR' },
             system: { url: WEB_APP_URL }
         };
+    } else {
+        if (!state.data.settings.company) state.data.settings.company = { name:'PT. Konstruksi Jaya', address:'', phone:'', email:'' };
+        if (!state.data.settings.app) state.data.settings.app = { name:'Manajemen Proyek', currency:'IDR' };
+        if (!state.data.settings.system) state.data.settings.system = { url: WEB_APP_URL };
+        if (!state.data.settings.system.url || state.data.settings.system.url === '') state.data.settings.system.url = WEB_APP_URL;
     }
     if (!state.data._meta) state.data._meta = { version: 0, lastSync: 0 };
-    if (!state.data.projects) state.data.projects = [];
-    if (!state.data.rab) state.data.rab = [];
-    if (!state.data.works) state.data.works = [];
-    if (!state.data.workers) state.data.workers = [];
-    if (!state.data.attendance) state.data.attendance = [];
-    if (!state.data.cashflow) state.data.cashflow = [];
+    ['projects','rab','works','workers','attendance','cashflow'].forEach(k => {
+        if (!Array.isArray(state.data[k])) state.data[k] = [];
+    });
+
+    // 7. Simpan hasil final
+    try { await dbSet('data', state.data); } catch (e) {}
 }
 
 async function pullFromSheets() {
-    const url = state.data.settings && state.data.settings.system ? state.data.settings.system.url : '';
-    if (!url || url.includes('GANTI_DENGAN')) {
-        sync.setStatus('idle', 'Lokal saja');
-        return;
-    }
-    if (!navigator.onLine) {
-        sync.setStatus('offline');
-        return;
-    }
+    const url = (state.data.settings && state.data.settings.system) ? state.data.settings.system.url : '';
+    if (!url || url.includes('GANTI_DENGAN')) { sync.setStatus('idle', 'Lokal saja'); return; }
+    if (!navigator.onLine) { sync.setStatus('offline'); return; }
     try {
         sync.setStatus('syncing', 'Menarik data...');
         const res = await fetch(url + '?action=getAll', { redirect: 'follow' });
@@ -638,16 +678,22 @@ async function pullFromSheets() {
             const remoteVer = (remote._meta && remote._meta.version) || 0;
             const localVer = (state.data._meta && state.data._meta.version) || 0;
 
+            // Merge users secara aman
+            const localUsers = state.data.users || [];
+            const mergedUsers = mergeUsers(localUsers, remote.users || []);
+
             if (remoteVer >= localVer) {
-                const localUsers = state.data.users || [];
                 state.data = Object.assign(state.data, remote);
-                state.data.users = (remote.users && remote.users.length > 0) ? remote.users : localUsers;
+                state.data.users = mergedUsers;
                 state.data.settings = Object.assign(state.data.settings || {}, remote.settings || {});
                 state.data._meta = remote._meta || { version: remoteVer, lastSync: Date.now() };
-                await dbSet('data', state.data);
-                console.log('Pulled from Sheets, version:', remoteVer);
+            } else {
+                // Data lokal lebih baru; hanya update users gabungan
+                state.data.users = mergedUsers;
             }
+            await dbSet('data', state.data);
             sync.setStatus('idle');
+            console.log('Pull complete, remote version:', remoteVer);
         } else {
             throw new Error(json.message || 'Pull gagal');
         }
@@ -655,6 +701,13 @@ async function pullFromSheets() {
         console.warn('Pull error:', e);
         sync.setStatus('offline');
     }
+}
+
+async function manualPull() {
+    showToast('Menarik data...', 'info');
+    await pullFromSheets();
+    loadAllData();
+    showToast('Data ditarik dari server', 'success');
 }
 
 // ============================================================
@@ -678,7 +731,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'hidden' && sync.pending) {
-            const url = state.data.settings && state.data.settings.system ? state.data.settings.system.url : '';
+            const url = (state.data.settings && state.data.settings.system) ? state.data.settings.system.url : '';
             if (url && !url.includes('GANTI_DENGAN') && navigator.sendBeacon) {
                 try {
                     const payload = JSON.stringify({ action: 'sync', data: state.data });
@@ -689,9 +742,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     document.getElementById('loading').classList.add('active');
-    await loadInitialData();
-    document.getElementById('loading').classList.remove('active');
-    checkAuth();
+    try {
+        await loadInitialData();
+    } catch (e) {
+        console.error('loadInitialData fatal:', e);
+        showToast('Gagal memuat data: ' + e.message, 'error');
+        // FALLBACK: seed admin minimal
+        if (!state.data.users || state.data.users.length === 0) {
+            state.data.users = [{ ...DEFAULT_ADMIN }];
+        }
+    } finally {
+        document.getElementById('loading').classList.remove('active');
+        checkAuth();
+    }
 });
 
 function initTheme() {
@@ -699,7 +762,6 @@ function initTheme() {
     const icon = document.getElementById('theme-icon');
     if (icon) icon.className = state.theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
 }
-
 function toggleTheme() {
     state.theme = state.theme === 'light' ? 'dark' : 'light';
     localStorage.setItem('theme', state.theme);
@@ -719,7 +781,6 @@ function initSignature() {
     signatureCtx.strokeStyle = '#000';
     signatureCtx.lineWidth = 2;
     signatureCtx.lineCap = 'round';
-
     signatureCanvas.addEventListener('mousedown', startDrawing);
     signatureCanvas.addEventListener('mousemove', draw);
     signatureCanvas.addEventListener('mouseup', stopDrawing);
@@ -728,7 +789,6 @@ function initSignature() {
     signatureCanvas.addEventListener('touchmove', handleTouchMove, { passive: false });
     signatureCanvas.addEventListener('touchend', stopDrawing);
 }
-
 function startDrawing(e) {
     isDrawing = true;
     const rect = signatureCanvas.getBoundingClientRect();
@@ -744,18 +804,18 @@ function draw(e) {
 function stopDrawing() { isDrawing = false; }
 function handleTouchStart(e) {
     e.preventDefault();
-    const touch = e.touches[0];
+    const t = e.touches[0];
     const rect = signatureCanvas.getBoundingClientRect();
     isDrawing = true;
     signatureCtx.beginPath();
-    signatureCtx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
+    signatureCtx.moveTo(t.clientX - rect.left, t.clientY - rect.top);
 }
 function handleTouchMove(e) {
     e.preventDefault();
     if (!isDrawing) return;
-    const touch = e.touches[0];
+    const t = e.touches[0];
     const rect = signatureCanvas.getBoundingClientRect();
-    signatureCtx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
+    signatureCtx.lineTo(t.clientX - rect.left, t.clientY - rect.top);
     signatureCtx.stroke();
 }
 function clearSignature() {
@@ -769,27 +829,65 @@ function checkAuth() {
     const session = localStorage.getItem('current_user');
     if (session) {
         try {
-            state.currentUser = JSON.parse(session);
-            const stillExists = state.data.users.find(u => u.id === state.currentUser.id);
-            if (stillExists) { showApp(); return; }
-        } catch (e) {}
+            const u = JSON.parse(session);
+            const stillExists = (state.data.users || []).find(x => x.username === u.username);
+            if (stillExists && stillExists.status !== 'Nonaktif') {
+                state.currentUser = stillExists;
+                showApp();
+                return;
+            }
+            // session basi -> hapus
+            localStorage.removeItem('current_user');
+        } catch (e) {
+            localStorage.removeItem('current_user');
+        }
     }
     showLogin();
 }
 
 function handleLogin() {
-    const username = document.getElementById('login-username').value.trim();
-    const password = document.getElementById('login-password').value;
-    if (!username || !password) { showToast('Username dan password harus diisi!', 'error'); return; }
-    const user = state.data.users.find(u => u.username === username && u.password === password);
+    const usernameEl = document.getElementById('login-username');
+    const passwordEl = document.getElementById('login-password');
+    const username = usernameEl.value.trim();
+    const password = passwordEl.value;
+
+    console.log('[LOGIN ATTEMPT]', { username, usersCount: (state.data.users || []).length });
+    console.log('[USERS]', JSON.stringify(state.data.users));
+
+    if (!username || !password) {
+        showToast('Username dan password harus diisi!', 'error');
+        return;
+    }
+
+    // Pastikan users valid
+    if (!Array.isArray(state.data.users) || state.data.users.length === 0) {
+        state.data.users = [{ ...DEFAULT_ADMIN }];
+    }
+
+    const user = state.data.users.find(u =>
+        String(u.username).toLowerCase() === username.toLowerCase() &&
+        String(u.password) === password
+    );
+
+    console.log('[MATCH]', user ? 'FOUND' : 'NOT FOUND');
+
     if (user) {
-        if (user.status === 'Nonaktif') { showToast('Akun dinonaktifkan.', 'error'); return; }
+        if (user.status === 'Nonaktif') {
+            showToast('Akun dinonaktifkan.', 'error');
+            return;
+        }
         state.currentUser = user;
         localStorage.setItem('current_user', JSON.stringify(user));
         showApp();
         showToast(`Selamat datang, ${user.fullname}!`, 'success');
     } else {
-        showToast('Username atau password salah!', 'error');
+        // Diagnostik tambahan
+        const exists = state.data.users.find(u => String(u.username).toLowerCase() === username.toLowerCase());
+        if (exists) {
+            showToast('Password salah!', 'error');
+        } else {
+            showToast('Username tidak ditemukan!', 'error');
+        }
     }
 }
 
@@ -834,7 +932,6 @@ function navigateTo(section) {
     document.getElementById('sidebar').classList.remove('active');
     loadSectionData(section);
 }
-
 function toggleSidebar() { document.getElementById('sidebar').classList.toggle('active'); }
 
 function loadAllData() {
@@ -842,7 +939,6 @@ function loadAllData() {
     loadCashflow(); loadUsers(); loadSettings(); updateDashboard();
     populateProjectSelects(); populateWorkerSelects(); populateReportSelect();
 }
-
 function loadSectionData(section) {
     switch (section) {
         case 'dashboard': updateDashboard(); break;
@@ -858,7 +954,7 @@ function loadSectionData(section) {
 }
 
 // ============================================================
-// RENDER TABLES
+// TABLES
 // ============================================================
 function loadProjects() {
     const tbody = document.getElementById('projects-tbody');
@@ -879,7 +975,6 @@ function loadProjects() {
         </tr>
     `).join('');
 }
-
 function loadRab() {
     const tbody = document.getElementById('rab-tbody');
     if (!tbody) return;
@@ -902,7 +997,6 @@ function loadRab() {
         </tr>`;
     }).join('');
 }
-
 function loadWorks() {
     const tbody = document.getElementById('works-tbody');
     if (!tbody) return;
@@ -925,7 +1019,6 @@ function loadWorks() {
         </tr>`;
     }).join('');
 }
-
 function loadWorkers() {
     const tbody = document.getElementById('workers-tbody');
     if (!tbody) return;
@@ -947,7 +1040,6 @@ function loadWorkers() {
         </tr>`;
     }).join('');
 }
-
 function loadAttendance() {
     const tbody = document.getElementById('attendance-tbody');
     if (!tbody) return;
@@ -958,12 +1050,12 @@ function loadAttendance() {
     tbody.innerHTML = state.data.attendance.map(a => {
         const worker = state.data.workers.find(w => w.id === a.workerId);
         const project = state.data.projects.find(p => p.id === a.projectId);
-        const statusColor = a.status === 'Hadir' ? '#28a745' : a.status === 'Izin' ? '#f8961e' : '#f72585';
+        const sc = a.status === 'Hadir' ? '#28a745' : a.status === 'Izin' ? '#f8961e' : '#f72585';
         return `<tr>
             <td>${formatDate(a.date)}</td>
             <td>${worker ? escapeHtml(worker.name) : '-'}</td>
             <td>${project ? escapeHtml(project.name) : '-'}</td>
-            <td><span style="padding:3px 8px;border-radius:12px;font-size:.8rem;background:${statusColor}20;color:${statusColor};">${a.status}</span></td>
+            <td><span style="padding:3px 8px;border-radius:12px;font-size:.8rem;background:${sc}20;color:${sc};">${a.status}</span></td>
             <td>${escapeHtml(a.note || '-')}</td>
             <td><div class="btn-group">
                 <button class="btn btn-sm btn-warning" onclick="editAttendance('${a.id}')"><i class="fas fa-edit"></i></button>
@@ -972,7 +1064,6 @@ function loadAttendance() {
         </tr>`;
     }).join('');
 }
-
 function loadCashflow() {
     const tbody = document.getElementById('cashflow-tbody');
     if (!tbody) return;
@@ -995,16 +1086,15 @@ function loadCashflow() {
         </tr>`;
     }).join('');
 }
-
 function loadUsers() {
     const tbody = document.getElementById('users-tbody');
     if (!tbody) return;
     tbody.innerHTML = state.data.users.map(u => {
-        const roleColor = u.role === 'admin' ? '#4361ee' : u.role === 'manager' ? '#7209b7' : '#4cc9f0';
+        const rc = u.role === 'admin' ? '#4361ee' : u.role === 'manager' ? '#7209b7' : '#4cc9f0';
         return `<tr>
             <td>${escapeHtml(u.username)}</td>
             <td>${escapeHtml(u.fullname)}</td>
-            <td><span style="padding:3px 8px;border-radius:12px;font-size:.8rem;background:${roleColor}20;color:${roleColor};">${u.role}</span></td>
+            <td><span style="padding:3px 8px;border-radius:12px;font-size:.8rem;background:${rc}20;color:${rc};">${u.role}</span></td>
             <td>${u.status || 'Aktif'}</td>
             <td><div class="btn-group">
                 <button class="btn btn-sm btn-warning" onclick="editUser('${u.id}')"><i class="fas fa-edit"></i></button>
@@ -1013,7 +1103,6 @@ function loadUsers() {
         </tr>`;
     }).join('');
 }
-
 function loadSettings() {
     const s = state.data.settings;
     document.getElementById('set-company-name').value = s.company.name || '';
@@ -1024,41 +1113,39 @@ function loadSettings() {
     document.getElementById('set-app-currency').value = s.app.currency || 'IDR';
     document.getElementById('set-system-url').value = s.system.url || '';
 }
-
 function updateDashboard() {
     document.getElementById('stat-projects').textContent = state.data.projects.length;
     document.getElementById('stat-workers').textContent = state.data.workers.length;
-    const totalIncome = state.data.cashflow.filter(c => c.type === 'Pemasukan').reduce((s, c) => s + Number(c.amount || 0), 0);
-    const totalExpense = state.data.cashflow.filter(c => c.type === 'Pengeluaran').reduce((s, c) => s + Number(c.amount || 0), 0);
-    document.getElementById('stat-income').textContent = 'Rp ' + formatNumber(totalIncome);
-    document.getElementById('stat-expense').textContent = 'Rp ' + formatNumber(totalExpense);
-
+    const inc = state.data.cashflow.filter(c => c.type === 'Pemasukan').reduce((s, c) => s + Number(c.amount || 0), 0);
+    const exp = state.data.cashflow.filter(c => c.type === 'Pengeluaran').reduce((s, c) => s + Number(c.amount || 0), 0);
+    document.getElementById('stat-income').textContent = 'Rp ' + formatNumber(inc);
+    document.getElementById('stat-expense').textContent = 'Rp ' + formatNumber(exp);
     const ctx = document.getElementById('cashflow-chart');
     if (ctx) {
         if (cashflowChart) cashflowChart.destroy();
         const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'];
-        const incomeData = new Array(12).fill(0);
-        const expenseData = new Array(12).fill(0);
+        const incData = new Array(12).fill(0);
+        const expData = new Array(12).fill(0);
         state.data.cashflow.forEach(c => {
             const m = new Date(c.date).getMonth();
             if (isNaN(m)) return;
-            if (c.type === 'Pemasukan') incomeData[m] += Number(c.amount || 0);
-            else expenseData[m] += Number(c.amount || 0);
+            if (c.type === 'Pemasukan') incData[m] += Number(c.amount || 0);
+            else expData[m] += Number(c.amount || 0);
         });
-        const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text').trim();
-        const mutedColor = getComputedStyle(document.documentElement).getPropertyValue('--text-muted').trim();
+        const tc = getComputedStyle(document.documentElement).getPropertyValue('--text').trim();
+        const mc = getComputedStyle(document.documentElement).getPropertyValue('--text-muted').trim();
         cashflowChart = new Chart(ctx, {
             type: 'bar',
             data: { labels: months, datasets: [
-                { label: 'Pemasukan', data: incomeData, backgroundColor: '#4cc9f0', borderRadius: 6 },
-                { label: 'Pengeluaran', data: expenseData, backgroundColor: '#f72585', borderRadius: 6 }
+                { label: 'Pemasukan', data: incData, backgroundColor: '#4cc9f0', borderRadius: 6 },
+                { label: 'Pengeluaran', data: expData, backgroundColor: '#f72585', borderRadius: 6 }
             ]},
             options: {
                 responsive: true, maintainAspectRatio: false,
-                plugins: { legend: { labels: { color: textColor } } },
+                plugins: { legend: { labels: { color: tc } } },
                 scales: {
-                    y: { ticks: { color: mutedColor }, grid: { color: 'rgba(0,0,0,0.05)' } },
-                    x: { ticks: { color: mutedColor }, grid: { display: false } }
+                    y: { ticks: { color: mc }, grid: { color: 'rgba(0,0,0,0.05)' } },
+                    x: { ticks: { color: mc }, grid: { display: false } }
                 }
             }
         });
@@ -1080,9 +1167,7 @@ function formatDate(d) {
     return dt.toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' });
 }
 function getStatusColor(s) {
-    return ({ 'Perencanaan':'#4361ee', 'Berjalan':'#f8961e', 'Selesai':'#28a745', 'Ditunda':'#f72585',
-        'Belum Mulai':'#6c757d', 'Proses':'#f8961e', 'Hadir':'#28a745', 'Izin':'#f8961e',
-        'Sakit':'#f72585', 'Alpha':'#dc3545' })[s] || '#6c757d';
+    return ({ 'Perencanaan':'#4361ee','Berjalan':'#f8961e','Selesai':'#28a745','Ditunda':'#f72585','Belum Mulai':'#6c757d','Proses':'#f8961e','Hadir':'#28a745','Izin':'#f8961e','Sakit':'#f72585','Alpha':'#dc3545' })[s] || '#6c757d';
 }
 function showToast(msg, type) {
     type = type || 'info';
@@ -1118,7 +1203,6 @@ function compressImage(file, maxWidth, quality) {
         reader.readAsDataURL(file);
     });
 }
-
 async function previewImage(input, previewId) {
     const preview = document.getElementById(previewId);
     if (input.files && input.files[0]) {
@@ -1178,7 +1262,6 @@ function openProjectModal(editId) {
     document.getElementById('project-modal').classList.add('active');
 }
 function editProject(id) { openProjectModal(id); }
-
 async function saveProject(e) {
     e.preventDefault();
     const id = document.getElementById('project-id').value;
@@ -1194,25 +1277,16 @@ async function saveProject(e) {
         photoBefore: pb.style.display !== 'none' ? pb.src : '',
         photoAfter: pa.style.display !== 'none' ? pa.src : ''
     };
-    if (id) {
-        const idx = state.data.projects.findIndex(p => p.id === id);
-        if (idx !== -1) state.data.projects[idx] = data;
-    } else {
-        state.data.projects.push(data);
-    }
+    if (id) { const idx = state.data.projects.findIndex(p => p.id === id); if (idx !== -1) state.data.projects[idx] = data; }
+    else state.data.projects.push(data);
     await saveData();
-    closeModal('project-modal');
-    loadProjects();
-    populateProjectSelects();
-    updateDashboard();
+    closeModal('project-modal'); loadProjects(); populateProjectSelects(); updateDashboard();
     showToast(id ? 'Proyek diupdate!' : 'Proyek ditambahkan!', 'success');
 }
-
 async function deleteProject(id) {
     if (!confirm('Hapus proyek ini?')) return;
     state.data.projects = state.data.projects.filter(p => p.id !== id);
-    await saveData();
-    loadProjects(); populateProjectSelects(); updateDashboard();
+    await saveData(); loadProjects(); populateProjectSelects(); updateDashboard();
     showToast('Proyek dihapus.', 'success');
 }
 
@@ -1270,8 +1344,7 @@ async function saveRab(e) {
     };
     state.data.rab.push(data);
     await saveData();
-    closeModal('rab-modal');
-    loadRab();
+    closeModal('rab-modal'); loadRab();
     showToast('RAB disimpan!', 'success');
 }
 async function deleteRab(id) {
@@ -1286,13 +1359,13 @@ function printRab(id) {
     const p = state.data.projects.find(x => x.id === r.projectId);
     const items = Array.isArray(r.items) ? r.items : [];
     const total = items.reduce((s, i) => s + (i.qty * i.price), 0);
-    const company = state.data.settings.company;
+    const co = state.data.settings.company;
     const win = window.open('', '_blank');
     win.document.write(`
         <html><head><title>RAB</title>
         <style>body{font-family:Arial,sans-serif;padding:20px;}h1{font-size:18px;text-align:center;}table{width:100%;border-collapse:collapse;margin-top:20px;}th,td{border:1px solid #ddd;padding:8px;font-size:12px;text-align:left;}th{background:#f0f0f0;}.sig{margin-top:30px;text-align:right;}.sig img{max-width:150px;border:1px solid #ddd;}@media print{.no-print{display:none;}}</style></head><body>
         <h1>RENCANA ANGGARAN BELANJA (RAB)</h1>
-        <p><strong>${escapeHtml(company.name)}</strong><br>${escapeHtml(company.address)}<br>${escapeHtml(company.phone)}</p><hr>
+        <p><strong>${escapeHtml(co.name)}</strong><br>${escapeHtml(co.address)}<br>${escapeHtml(co.phone)}</p><hr>
         <p><strong>Proyek:</strong> ${p ? escapeHtml(p.name) : '-'}<br><strong>Lokasi:</strong> ${p ? escapeHtml(p.location) : '-'}<br><strong>Tanggal:</strong> ${formatDate(r.date)}<br><strong>Manager:</strong> ${escapeHtml(r.manager)}</p>
         <table><thead><tr><th>No</th><th>Item</th><th>Qty</th><th>Harga</th><th>Total</th></tr></thead>
         <tbody>${items.map((it, i) => `<tr><td>${i+1}</td><td>${escapeHtml(it.name)}</td><td>${it.qty}</td><td>Rp ${formatNumber(it.price)}</td><td>Rp ${formatNumber(it.qty * it.price)}</td></tr>`).join('')}</tbody>
@@ -1336,12 +1409,9 @@ async function saveWork(e) {
         unit: document.getElementById('work-unit').value,
         status: document.getElementById('work-status').value
     };
-    if (id) {
-        const idx = state.data.works.findIndex(w => w.id === id);
-        if (idx !== -1) state.data.works[idx] = data;
-    } else state.data.works.push(data);
-    await saveData();
-    closeModal('work-modal'); loadWorks();
+    if (id) { const idx = state.data.works.findIndex(w => w.id === id); if (idx !== -1) state.data.works[idx] = data; }
+    else state.data.works.push(data);
+    await saveData(); closeModal('work-modal'); loadWorks();
     showToast(id ? 'Pekerjaan diupdate!' : 'Pekerjaan ditambahkan!', 'success');
 }
 async function deleteWork(id) {
@@ -1381,12 +1451,9 @@ async function saveWorker(e) {
         position: document.getElementById('worker-position').value,
         phone: document.getElementById('worker-phone').value
     };
-    if (id) {
-        const idx = state.data.workers.findIndex(w => w.id === id);
-        if (idx !== -1) state.data.workers[idx] = data;
-    } else state.data.workers.push(data);
-    await saveData();
-    closeModal('worker-modal'); loadWorkers(); populateWorkerSelects(); updateDashboard();
+    if (id) { const idx = state.data.workers.findIndex(w => w.id === id); if (idx !== -1) state.data.workers[idx] = data; }
+    else state.data.workers.push(data);
+    await saveData(); closeModal('worker-modal'); loadWorkers(); populateWorkerSelects(); updateDashboard();
     showToast(id ? 'Pekerja diupdate!' : 'Pekerja ditambahkan!', 'success');
 }
 async function deleteWorker(id) {
@@ -1429,12 +1496,9 @@ async function saveAttendance(e) {
         status: document.getElementById('attendance-status').value,
         note: document.getElementById('attendance-note').value
     };
-    if (id) {
-        const idx = state.data.attendance.findIndex(a => a.id === id);
-        if (idx !== -1) state.data.attendance[idx] = data;
-    } else state.data.attendance.push(data);
-    await saveData();
-    closeModal('attendance-modal'); loadAttendance();
+    if (id) { const idx = state.data.attendance.findIndex(a => a.id === id); if (idx !== -1) state.data.attendance[idx] = data; }
+    else state.data.attendance.push(data);
+    await saveData(); closeModal('attendance-modal'); loadAttendance();
     showToast(id ? 'Absensi diupdate!' : 'Absensi dicatat!', 'success');
 }
 async function deleteAttendance(id) {
@@ -1477,12 +1541,9 @@ async function saveCashflow(e) {
         desc: document.getElementById('cashflow-desc').value,
         amount: parseFloat(document.getElementById('cashflow-amount').value) || 0
     };
-    if (id) {
-        const idx = state.data.cashflow.findIndex(c => c.id === id);
-        if (idx !== -1) state.data.cashflow[idx] = data;
-    } else state.data.cashflow.push(data);
-    await saveData();
-    closeModal('cashflow-modal'); loadCashflow(); updateDashboard();
+    if (id) { const idx = state.data.cashflow.findIndex(c => c.id === id); if (idx !== -1) state.data.cashflow[idx] = data; }
+    else state.data.cashflow.push(data);
+    await saveData(); closeModal('cashflow-modal'); loadCashflow(); updateDashboard();
     showToast(id ? 'Transaksi diupdate!' : 'Transaksi ditambahkan!', 'success');
 }
 async function deleteCashflow(id) {
@@ -1517,7 +1578,7 @@ async function saveUser(e) {
     const password = document.getElementById('user-password').value;
     const data = {
         id: id || Date.now().toString(),
-        username: document.getElementById('user-username').value,
+        username: document.getElementById('user-username').value.trim(),
         fullname: document.getElementById('user-fullname').value,
         role: document.getElementById('user-role').value,
         status: 'Aktif'
@@ -1533,8 +1594,7 @@ async function saveUser(e) {
         data.password = password;
         state.data.users.push(data);
     }
-    await saveData();
-    closeModal('user-modal'); loadUsers();
+    await saveData(); closeModal('user-modal'); loadUsers();
     showToast(id ? 'Pengguna diupdate!' : 'Pengguna ditambahkan!', 'success');
 }
 async function deleteUser(id) {
@@ -1609,8 +1669,8 @@ function generateReport() {
     const works = state.data.works.filter(w => w.projectId === pid);
     const workers = state.data.workers.filter(w => w.projectId === pid);
     const cf = state.data.cashflow.filter(x => x.projectId === pid);
-    const income = cf.filter(x => x.type === 'Pemasukan').reduce((s, x) => s + Number(x.amount || 0), 0);
-    const expense = cf.filter(x => x.type === 'Pengeluaran').reduce((s, x) => s + Number(x.amount || 0), 0);
+    const inc = cf.filter(x => x.type === 'Pemasukan').reduce((s, x) => s + Number(x.amount || 0), 0);
+    const exp = cf.filter(x => x.type === 'Pengeluaran').reduce((s, x) => s + Number(x.amount || 0), 0);
     c.innerHTML = `
         <div class="card" style="padding:20px;">
             <h3>${escapeHtml(p.name)}</h3>
@@ -1618,11 +1678,10 @@ function generateReport() {
             <p><strong>Anggaran:</strong> Rp ${formatNumber(p.budget)}</p>
             <hr style="margin:15px 0;border-color:var(--border);">
             <p>Pekerjaan: ${works.length} item | Pekerja: ${workers.length} orang</p>
-            <p>Pemasukan: Rp ${formatNumber(income)} | Pengeluaran: Rp ${formatNumber(expense)}</p>
-            <p>Saldo: Rp ${formatNumber(income - expense)}</p>
+            <p>Pemasukan: Rp ${formatNumber(inc)} | Pengeluaran: Rp ${formatNumber(exp)}</p>
+            <p>Saldo: Rp ${formatNumber(inc - exp)}</p>
         </div>`;
 }
-
 function printReport(type) {
     const pid = document.getElementById('report-project-select').value;
     if (!pid) { showToast('Pilih proyek dulu!', 'error'); return; }
@@ -1631,8 +1690,8 @@ function printReport(type) {
     const works = state.data.works.filter(w => w.projectId === pid);
     const workers = state.data.workers.filter(w => w.projectId === pid);
     const cf = state.data.cashflow.filter(x => x.projectId === pid);
-    const income = cf.filter(x => x.type === 'Pemasukan').reduce((s, x) => s + Number(x.amount || 0), 0);
-    const expense = cf.filter(x => x.type === 'Pengeluaran').reduce((s, x) => s + Number(x.amount || 0), 0);
+    const inc = cf.filter(x => x.type === 'Pemasukan').reduce((s, x) => s + Number(x.amount || 0), 0);
+    const exp = cf.filter(x => x.type === 'Pengeluaran').reduce((s, x) => s + Number(x.amount || 0), 0);
     const co = state.data.settings.company;
 
     if (type === 'thermal') {
@@ -1644,7 +1703,7 @@ function printReport(type) {
             <hr><div class="center"><strong>LAPORAN PROYEK</strong></div><hr>
             <p>Proyek: ${escapeHtml(p.name)}<br>Jenis: ${escapeHtml(p.type)}<br>Lokasi: ${escapeHtml(p.location)}<br>Status: ${p.status}</p>
             <hr>
-            <p>Anggaran: Rp ${formatNumber(p.budget)}<br>Pemasukan: Rp ${formatNumber(income)}<br>Pengeluaran: Rp ${formatNumber(expense)}<br>Saldo: Rp ${formatNumber(income - expense)}</p>
+            <p>Anggaran: Rp ${formatNumber(p.budget)}<br>Pemasukan: Rp ${formatNumber(inc)}<br>Pengeluaran: Rp ${formatNumber(exp)}<br>Saldo: Rp ${formatNumber(inc - exp)}</p>
             <hr>
             <p>Pekerjaan: ${works.length} item<br>Pekerja: ${workers.length} orang</p>
             <hr>
@@ -1669,9 +1728,9 @@ function printReport(type) {
             </table>
             <h3>Keuangan</h3>
             <table>
-                <tr><th>Pemasukan</th><td>Rp ${formatNumber(income)}</td></tr>
-                <tr><th>Pengeluaran</th><td>Rp ${formatNumber(expense)}</td></tr>
-                <tr><th>Saldo</th><td>Rp ${formatNumber(income - expense)}</td></tr>
+                <tr><th>Pemasukan</th><td>Rp ${formatNumber(inc)}</td></tr>
+                <tr><th>Pengeluaran</th><td>Rp ${formatNumber(exp)}</td></tr>
+                <tr><th>Saldo</th><td>Rp ${formatNumber(inc - exp)}</td></tr>
             </table>
             <h3>Pekerjaan (${works.length})</h3>
             <table><thead><tr><th>No</th><th>Nama</th><th>Volume</th><th>Satuan</th><th>Status</th></tr></thead>
@@ -1701,7 +1760,6 @@ async function backupData() {
     URL.revokeObjectURL(url);
     showToast('Backup diunduh!', 'success');
 }
-
 function restoreData(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -1712,6 +1770,9 @@ function restoreData(event) {
             if (!confirm('Restore data? Data saat ini akan diganti.')) return;
             state.data = data;
             if (!state.data._meta) state.data._meta = { version: Date.now(), lastSync: 0 };
+            if (!state.data.users || state.data.users.length === 0) state.data.users = [{ ...DEFAULT_ADMIN }];
+            const admin = state.data.users.find(u => u.username === 'admin');
+            if (admin && !admin.password) admin.password = '418899';
             await dbSet('data', state.data);
             await sync.flush();
             loadAllData();
