@@ -1,125 +1,291 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Manajemen Proyek Lapangan</title>
+<title>Proyek Lapangan v2</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1e40af">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/frappe-gantt@0.6.1/dist/frappe-gantt.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/frappe-gantt@0.6.1/dist/frappe-gantt.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, Segoe UI, Roboto, sans-serif; background: #f0f2f5; color: #1c1e21; }
-  header { background: linear-gradient(135deg, #1e40af, #3b82f6); color: white; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,.1); }
-  header h1 { font-size: 20px; }
-  header p { font-size: 12px; opacity: .9; margin-top: 4px; }
-  .container { max-width: 1100px; margin: 0 auto; padding: 16px; }
-  .tabs { display: flex; gap: 8px; margin-bottom: 16px; }
-  .tab { padding: 10px 16px; background: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; color: #555; }
-  .tab.active { background: #1e40af; color: white; }
-  .card { background: white; border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
-  .card h2 { font-size: 16px; margin-bottom: 12px; color: #1e40af; }
-  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .form-grid.full { grid-template-columns: 1fr; }
-  input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; font-family: inherit; }
-  textarea { resize: vertical; min-height: 60px; }
-  label { font-size: 12px; font-weight: 600; color: #666; display: block; margin-bottom: 4px; }
-  .btn { padding: 10px 18px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; }
-  .btn-primary { background: #1e40af; color: white; }
-  .btn-danger { background: #dc2626; color: white; }
-  .btn-sm { padding: 6px 12px; font-size: 12px; }
-  .btn-outline { background: white; border: 1px solid #ddd; color: #333; }
-  .item { border: 1px solid #eee; border-radius: 10px; padding: 12px; margin-bottom: 10px; }
-  .item-head { display: flex; justify-content: space-between; align-items: start; gap: 8px; margin-bottom: 8px; }
-  .item-title { font-weight: 700; font-size: 15px; }
-  .item-sub { font-size: 12px; color: #666; margin-top: 2px; }
-  .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; }
-  .badge.planning { background: #fef3c7; color: #92400e; }
-  .badge.berjalan { background: #dbeafe; color: #1e40af; }
-  .badge.selesai { background: #d1fae5; color: #065f46; }
-  .badge.todo { background: #fee2e2; color: #991b1b; }
-  .badge.progress { background: #fef3c7; color: #92400e; }
-  .badge.done { background: #d1fae5; color: #065f46; }
-  .progress-bar { height: 8px; background: #e5e7eb; border-radius: 999px; overflow: hidden; margin-top: 8px; }
-  .progress-fill { height: 100%; background: linear-gradient(90deg, #3b82f6, #1e40af); transition: width .3s; }
-  .actions { display: flex; gap: 6px; margin-top: 10px; }
-  .empty { text-align: center; color: #999; padding: 30px; font-size: 14px; }
-  .loading { text-align: center; padding: 20px; color: #666; }
-  .toast { position: fixed; bottom: 20px; right: 20px; background: #1c1e21; color: white; padding: 12px 20px; border-radius: 8px; font-size: 14px; opacity: 0; transform: translateY(20px); transition: all .3s; z-index: 1000; }
-  .toast.show { opacity: 1; transform: translateY(0); }
-  .toast.error { background: #dc2626; }
-  @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{--bg:#f1f5f9;--card:#fff;--text:#1e293b;--muted:#64748b;--border:#e2e8f0;--primary:#1e40af}
+  body.dark{--bg:#0f172a;--card:#1e293b;--text:#e2e8f0;--muted:#94a3b8;--border:#334155;--primary:#3b82f6}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);padding:16px;padding-bottom:90px;transition:background .2s}
+  header{background:linear-gradient(135deg,#1e40af,#1e3a8a);color:#fff;padding:16px;margin:-16px -16px 16px;text-align:center;position:relative}
+  header h1{font-size:17px}
+  header p{font-size:11px;opacity:.85;margin-top:4px}
+  .head-btns{position:absolute;top:12px;right:12px;display:flex;gap:4px}
+  .head-btns button{background:rgba(255,255,255,.2);border:none;color:#fff;padding:6px 8px;border-radius:6px;font-size:12px;cursor:pointer}
+  .tabs{display:flex;gap:4px;margin-bottom:12px;flex-wrap:wrap}
+  .tabs button{flex:1;padding:9px 2px;border:none;border-radius:8px;background:var(--card);color:var(--muted);font-weight:600;font-size:11px;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.05);min-width:55px}
+  .tabs button.active{background:var(--primary);color:#fff}
+  .card{background:var(--card);border-radius:12px;padding:14px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+  .card h3{font-size:15px;margin-bottom:6px}
+  .card p{font-size:13px;color:var(--muted);margin-bottom:3px}
+  .badge{display:inline-block;padding:3px 8px;border-radius:12px;font-size:11px;font-weight:600;margin-right:6px;margin-top:6px}
+  .badge.Baru{background:#dbeafe;color:#1e40af}
+  .badge.Proses{background:#fef3c7;color:#b45309}
+  .badge.Selesai{background:#dcfce7;color:#15803d}
+  .badge.Tinggi{background:#fee2e2;color:#b91c1c}
+  .badge.Sedang{background:#fef3c7;color:#b45309}
+  .badge.Rendah{background:#e0e7ff;color:#4338ca}
+  .badge.Aktif{background:#dcfce7;color:#15803d}
+  .badge.Proyek{background:#ddd6fe;color:#5b21b6}
+  .btn-group{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+  .btn{flex:1;padding:8px;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;min-width:65px}
+  .btn-primary{background:var(--primary);color:#fff}
+  .btn-success{background:#16a34a;color:#fff}
+  .btn-warning{background:#f59e0b;color:#fff}
+  .btn-danger{background:#dc2626;color:#fff}
+  .btn-secondary{background:var(--border);color:var(--text)}
+  form label{display:block;font-size:13px;font-weight:600;margin:10px 0 4px;color:var(--text)}
+  form input,form select,form textarea{width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;background:var(--card);color:var(--text)}
+  form button[type=submit]{width:100%;padding:12px;margin-top:16px;background:var(--primary);color:#fff;border:none;border-radius:8px;font-weight:700;font-size:15px;cursor:pointer}
+  form button[type=submit]:disabled{background:#94a3b8}
+  .empty{text-align:center;color:var(--muted);padding:30px 0;font-size:14px}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1e293b;color:#fff;padding:12px 20px;border-radius:8px;font-size:13px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:9999;max-width:90vw;text-align:center}
+  .toast.show{opacity:1}
+  .loading{text-align:center;padding:20px;color:var(--muted);font-size:13px}
+  .gps-info{font-size:11px;color:var(--muted);margin-top:4px}
+  .filter-bar{background:var(--card);border-radius:10px;padding:10px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+  .filter-bar input,.filter-bar select{width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:13px;margin-bottom:6px;background:var(--card);color:var(--text)}
+  .filter-bar .row{display:flex;gap:6px}
+  .filter-bar .row select{flex:1;margin-bottom:0}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px}
+  .stat-box{background:var(--card);border-radius:10px;padding:10px 4px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+  .stat-box .num{font-size:20px;font-weight:700}
+  .stat-box .lbl{font-size:10px;color:var(--muted);margin-top:2px}
+  #map{height:300px;border-radius:12px;margin-bottom:12px}
+  .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;padding:16px;z-index:1000}
+  .modal-bg.show{display:flex}
+  .modal{background:var(--card);border-radius:12px;padding:20px;width:100%;max-width:420px;max-height:90vh;overflow-y:auto;color:var(--text)}
+  .modal h2{font-size:16px;margin-bottom:12px}
+  .login-box{max-width:340px;margin:60px auto;background:var(--card);border-radius:12px;padding:24px;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.1)}
+  .login-box h2{font-size:18px;margin-bottom:6px}
+  .login-box p{font-size:12px;color:var(--muted);margin-bottom:16px}
+  .login-box input{width:100%;padding:12px;font-size:20px;text-align:center;letter-spacing:8px;border:1px solid var(--border);border-radius:8px;margin-bottom:12px;background:var(--card);color:var(--text)}
+  .login-box button{width:100%;padding:12px;background:var(--primary);color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer}
+  .log-item{font-size:11px;padding:6px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:6px;flex-direction:column}
+  .log-item .time{color:var(--muted);white-space:nowrap;font-size:10px}
+  .log-item .delta{color:#b45309;font-style:italic}
+  .foto-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:8px}
+  .foto-grid img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:6px;cursor:pointer}
+  .komentar-item{font-size:12px;padding:6px;border-bottom:1px solid var(--border)}
+  .komentar-item .meta{font-size:10px;color:var(--muted);margin-bottom:2px}
+  .export-btns{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+  .export-btns button{flex:1;padding:8px;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;min-width:90px}
+  .role-tag{display:inline-block;padding:2px 6px;border-radius:6px;background:rgba(255,255,255,.25);font-size:10px}
+  .project-selector{background:var(--card);border-radius:10px;padding:10px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+  .project-selector select{width:100%;padding:10px;border:1px solid var(--border);border-radius:6px;font-size:14px;font-weight:600;background:var(--card);color:var(--text)}
+  #gantt{background:var(--card);border-radius:12px;padding:10px;overflow-x:auto;min-height:300px}
+  .gantt .bar-wrapper .bar{fill:var(--primary)}
+  .sig-canvas{width:100%;height:200px;border:2px dashed var(--border);border-radius:8px;background:#fff;touch-action:none}
+  .sig-preview{width:100%;max-height:120px;object-fit:contain;background:#fff;border-radius:8px;padding:4px;border:1px solid var(--border)}
 </style>
 </head>
 <body>
-<header>
-  <h1>🏗️ Manajemen Proyek Lapangan</h1>
-  <p>Data tersimpan otomatis di Google Spreadsheet</p>
-</header>
 
-<div class="container">
+<div id="loginView">
+  <div class="login-box">
+    <h2>🔒 Masuk</h2>
+    <p>Masukkan PIN Anda</p>
+    <input type="password" id="pinInput" maxlength="8" inputmode="numeric" placeholder="••••">
+    <button onclick="doLogin()">Masuk</button>
+  </div>
+</div>
+
+<div id="appView" style="display:none">
+  <header>
+    <h1>🏗️ Proyek Lapangan v2</h1>
+    <p id="userInfo"></p>
+    <div class="head-btns">
+      <button onclick="toggleTheme()">🌓</button>
+      <button onclick="enableNotif()">🔔</button>
+      <button onclick="logout()">🚪</button>
+    </div>
+  </header>
+
   <div class="tabs">
-    <button class="tab active" onclick="switchTab('projects')">📁 Proyek</button>
-    <button class="tab" onclick="switchTab('tasks')">✅ Tugas</button>
+    <button id="tab-list" class="active" onclick="showTab('list')">📋 Tugas</button>
+    <button id="tab-projects" onclick="showTab('projects')">📁 Proyek</button>
+    <button id="tab-gantt" onclick="showTab('gantt')">📅 Gantt</button>
+    <button id="tab-map" onclick="showTab('map')">🗺️ Peta</button>
+    <button id="tab-add" onclick="showTab('add')">➕ Baru</button>
+    <button id="tab-log" onclick="showTab('log')">📜 Log</button>
   </div>
 
-  <!-- ================= PROYEK ================= -->
-  <div id="tab-projects">
-    <div class="card">
-      <h2 id="projFormTitle">➕ Tambah Proyek</h2>
-      <div class="form-grid">
-        <div><label>Nama Proyek</label><input id="p_nama" placeholder="Contoh: Renovasi Gedung A"></div>
-        <div><label>Lokasi</label><input id="p_lokasi" placeholder="Contoh: Jakarta Selatan"></div>
-        <div><label>Tanggal Mulai</label><input id="p_mulai" type="date"></div>
-        <div><label>Tanggal Selesai</label><input id="p_selesai" type="date"></div>
-        <div><label>Status</label>
-          <select id="p_status">
-            <option value="planning">Planning</option>
-            <option value="berjalan">Berjalan</option>
-            <option value="selesai">Selesai</option>
-          </select>
-        </div>
-        <div><label>PIC</label><input id="p_pic" placeholder="Nama penanggung jawab"></div>
-        <div><label>Progres (%)</label><input id="p_progres" type="number" min="0" max="100" value="0"></div>
-      </div>
-      <div class="actions" style="margin-top:12px">
-        <button class="btn btn-primary" onclick="saveProject()">💾 Simpan</button>
-        <button class="btn btn-outline" onclick="resetProjectForm()" id="p_cancel" style="display:none">Batal</button>
-      </div>
-      <input type="hidden" id="p_id">
+  <!-- LIST -->
+  <div id="view-list">
+    <div class="project-selector">
+      <select id="projectFilter" onchange="renderTasks()">
+        <option value="">📁 Semua Proyek</option>
+      </select>
     </div>
+    <div class="stats" id="stats"></div>
+    <div class="filter-bar">
+      <input type="text" id="searchInput" placeholder="🔍 Cari..." oninput="renderTasks()">
+      <div class="row">
+        <select id="filterStatus" onchange="renderTasks()">
+          <option value="">Semua Status</option>
+          <option>Baru</option><option>Proses</option><option>Selesai</option>
+        </select>
+        <select id="filterPrioritas" onchange="renderTasks()">
+          <option value="">Semua Prioritas</option>
+          <option>Tinggi</option><option>Sedang</option><option>Rendah</option>
+        </select>
+      </div>
+      <div class="row" style="margin-top:6px">
+        <select id="sortBy" onchange="renderTasks()">
+          <option value="">Urut: Terbaru</option>
+          <option value="deadline">Deadline</option>
+          <option value="prioritas">Prioritas</option>
+          <option value="nama">Nama A-Z</option>
+        </select>
+      </div>
+    </div>
+    <div class="export-btns">
+      <button class="btn btn-primary" onclick="exportCSV()">📊 CSV</button>
+      <button class="btn btn-secondary" onclick="exportPDF()">🖨️ PDF</button>
+      <button class="btn btn-secondary" onclick="backupJSON()">💾 Backup</button>
+    </div>
+    <div class="loading" id="loading">Memuat data...</div>
+    <div id="tasks"></div>
+  </div>
 
+  <!-- PROJECTS -->
+  <div id="view-projects" style="display:none">
     <div class="card">
-      <h2>📋 Daftar Proyek</h2>
-      <div id="projList" class="loading">Memuat data...</div>
+      <h3>Tambah Proyek Baru</h3>
+      <form id="projForm" onsubmit="submitProject(event)">
+        <label>Nama Proyek *</label>
+        <input type="text" name="nama" required>
+        <label>Deskripsi</label>
+        <input type="text" name="deskripsi">
+        <label>Lokasi</label>
+        <input type="text" name="lokasi">
+        <label>Mulai</label>
+        <input type="date" name="mulai">
+        <label>Selesai</label>
+        <input type="date" name="selesai">
+        <label>PIC</label>
+        <input type="text" name="pic">
+        <button type="submit" id="projBtn">Simpan Proyek</button>
+      </form>
+    </div>
+    <div id="projectList"></div>
+  </div>
+
+  <!-- GANTT -->
+  <div id="view-gantt" style="display:none">
+    <div class="project-selector">
+      <select id="ganttProjectFilter" onchange="renderGantt()">
+        <option value="">📁 Semua Proyek</option>
+      </select>
+    </div>
+    <div id="gantt"><div class="loading">Memuat Gantt...</div></div>
+  </div>
+
+  <!-- MAP -->
+  <div id="view-map" style="display:none">
+    <div id="map"></div>
+    <p style="font-size:12px;color:var(--muted);text-align:center">Klik marker untuk detail</p>
+  </div>
+
+  <!-- ADD -->
+  <div id="view-add" style="display:none">
+    <div class="card">
+      <form id="taskForm" onsubmit="submitTask(event)">
+        <label>Proyek</label>
+        <select name="projectId" id="addProjectSelect">
+          <option value="">— Tanpa proyek —</option>
+        </select>
+        <label>Nama Tugas *</label>
+        <input type="text" name="nama" required>
+        <label>Lokasi *</label>
+        <input type="text" name="lokasi" required>
+        <label>Penanggung Jawab</label>
+        <input type="text" name="penanggungJawab">
+        <label>Start Date</label>
+        <input type="date" name="startDate">
+        <label>Deadline</label>
+        <input type="date" name="deadline">
+        <label>Prioritas</label>
+        <select name="prioritas">
+          <option>Rendah</option><option selected>Sedang</option><option>Tinggi</option>
+        </select>
+        <label>Foto (bisa >1)</label>
+        <input type="file" accept="image/*" multiple capture="environment" id="fotoInput">
+        <div class="gps-info" id="gpsInfo">📍 Mendeteksi lokasi...</div>
+        <button type="submit" id="submitBtn">Kirim Tugas</button>
+      </form>
     </div>
   </div>
 
-  <!-- ================= TUGAS ================= -->
-  <div id="tab-tasks" style="display:none">
+  <!-- LOG -->
+  <div id="view-log" style="display:none">
     <div class="card">
-      <h2 id="taskFormTitle">➕ Tambah Tugas</h2>
-      <div class="form-grid">
-        <div><label>Proyek</label><select id="t_projectId"></select></div>
-        <div><label>Judul Tugas</label><input id="t_judul" placeholder="Contoh: Cor lantai 2"></div>
-        <div><label>Assignee</label><input id="t_assignee" placeholder="Nama pelaksana"></div>
-        <div><label>Deadline</label><input id="t_deadline" type="date"></div>
-        <div><label>Status</label>
-          <select id="t_status">
-            <option value="todo">To Do</option>
-            <option value="progress">Progress</option>
-            <option value="done">Done</option>
-          </select>
-        </div>
-        <div><label>Catatan</label><input id="t_catatan" placeholder="Opsional"></div>
-      </div>
-      <div class="actions" style="margin-top:12px">
-        <button class="btn btn-primary" onclick="saveTask()">💾 Simpan</button>
-        <button class="btn btn-outline" onclick="resetTaskForm()" id="t_cancel" style="display:none">Batal</button>
-      </div>
-      <input type="hidden" id="t_id">
+      <h3>Audit Log Terakhir</h3>
+      <div id="logList"><div class="loading">Memuat...</div></div>
     </div>
+  </div>
+</div>
 
-    <div class="card">
-      <h2>✅ Daftar Tugas</h2>
-      <div id="taskList" class="loading">Memuat data...</div>
+<!-- EDIT MODAL -->
+<div class="modal-bg" id="editModal">
+  <div class="modal">
+    <h2>✏️ Edit Tugas</h2>
+    <form id="editForm" onsubmit="saveEdit(event)">
+      <input type="hidden" name="id">
+      <label>Proyek</label>
+      <select name="projectId" id="editProjectSelect"></select>
+      <label>Nama Tugas</label>
+      <input type="text" name="nama" required>
+      <label>Lokasi</label>
+      <input type="text" name="lokasi" required>
+      <label>Penanggung Jawab</label>
+      <input type="text" name="penanggungJawab">
+      <label>Start Date</label>
+      <input type="date" name="startDate">
+      <label>Deadline</label>
+      <input type="date" name="deadline">
+      <label>Prioritas</label>
+      <select name="prioritas">
+        <option>Rendah</option><option>Sedang</option><option>Tinggi</option>
+      </select>
+      <div class="btn-group">
+        <button type="button" class="btn btn-secondary" onclick="closeEdit()">Batal</button>
+        <button type="submit" class="btn btn-primary">Simpan</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="modal-bg" id="detailModal">
+  <div class="modal">
+    <h2 id="detailTitle"></h2>
+    <div id="detailBody"></div>
+    <div class="btn-group">
+      <button class="btn btn-secondary" onclick="closeDetail()">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<!-- SIGNATURE MODAL -->
+<div class="modal-bg" id="sigModal">
+  <div class="modal">
+    <h2>✍️ Tanda Tangan Serah Terima</h2>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:8px">Tanda tangan di area bawah</p>
+    <canvas id="sigCanvas" class="sig-canvas"></canvas>
+    <div class="btn-group">
+      <button class="btn btn-secondary" onclick="clearSig()">Hapus</button>
+      <button class="btn btn-secondary" onclick="closeSig()">Batal</button>
+      <button class="btn btn-success" onclick="saveSig()">Simpan</button>
     </div>
   </div>
 </div>
@@ -127,246 +293,552 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// ============ KONFIGURASI ============
-const API_URL = 'https://script.google.com/macros/s/AKfycbwrR-LPjQ8K9N3AxJReQwFMyvIzJ6IErNajBxg-zgA3g1A3hwGm-RtBcuFwGyjXbh5nPQ/exec';
-// contoh: https://script.google.com/macros/s/AKfy.../exec
+// ============================================
+// GANTI URL APPS SCRIPT ANDA
+// ============================================
+const API_URL = 'https://script.google.com/macros/s/AKfycbxiMdOcWSDllEw7iiOh_Jv8R5mgsw0k_dHdNzuvdNL0gvKzl7ZPKXsTtLUdMicgH9ZuKg/exec';
 
 // ============ STATE ============
-let state = { projects: [], tasks: [] };
+let allTasks = [];
+let allProjects = [];
+let currentLocation = { lat: '', lng: '' };
+let mapInstance = null, mapMarkers = [];
+let ganttInstance = null;
+let sigPad = null;
+let sigTaskId = null;
+let pin = sessionStorage.getItem('app_pin') || '';
+let currentUser = JSON.parse(sessionStorage.getItem('app_user') || 'null');
+let pollingTimer = null;
+let lastTaskCount = 0;
 
-// ============ API ============
-async function api(action, data) {
-  const res = await fetch(API_URL, {
-    method: 'POST',
-    body: JSON.stringify({ action, ...data }),
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
-  });
-  const json = await res.json();
-  if (!json.success) throw new Error(json.error);
-  return json.data;
-}
-
-async function loadAll() {
-  try {
-    const data = await api('getAll', {});
-    state.projects = data.projects;
-    state.tasks = data.tasks;
-    renderProjects();
-    renderTasks();
-    renderProjectOptions();
-  } catch (e) {
-    toast('Gagal memuat: ' + e.message, true);
-  }
-}
-
-// ============ TOAST ============
-let toastTimer;
-function toast(msg, isErr) {
+// ============ UTIL ============
+function toast(msg) {
   const el = document.getElementById('toast');
   el.textContent = msg;
-  el.className = 'toast show' + (isErr ? ' error' : '');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.className = 'toast', 3000);
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c =>
+    ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+function formatDate(d) {
+  if (!d) return '-';
+  try { return new Date(d).toLocaleDateString('id-ID', { day:'numeric', month:'short', year:'numeric' }); }
+  catch { return d; }
+}
+function postApi(payload) {
+  return fetch(API_URL, {
+    method: 'POST', headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify(payload)
+  }).then(r => r.json());
+}
+function projectName(id) {
+  if (!id) return '';
+  const p = allProjects.find(x => x['ID'] === id);
+  return p ? p['Nama Proyek'] : '';
+}
+
+// ============ TEMA ============
+function applyTheme() {
+  document.body.classList.toggle('dark', localStorage.getItem('app_theme') === 'dark');
+}
+function toggleTheme() {
+  localStorage.setItem('app_theme', localStorage.getItem('app_theme') === 'dark' ? 'light' : 'dark');
+  applyTheme();
+  if (ganttInstance) renderGantt();
+}
+applyTheme();
+
+// ============ AUTH ============
+async function doLogin() {
+  const val = document.getElementById('pinInput').value.trim();
+  if (!val) return toast('Masukkan PIN');
+  try {
+    const res = await postApi({ action: 'login', pin: val });
+    if (res.success) {
+      pin = val; currentUser = res.user;
+      sessionStorage.setItem('app_pin', pin);
+      sessionStorage.setItem('app_user', JSON.stringify(currentUser));
+      showApp();
+    } else toast('❌ ' + (res.message || 'PIN salah'));
+  } catch (err) { toast('❌ ' + err.message); }
+}
+function logout() {
+  pin = ''; currentUser = null;
+  sessionStorage.removeItem('app_pin');
+  sessionStorage.removeItem('app_user');
+  if (pollingTimer) clearInterval(pollingTimer);
+  document.getElementById('loginView').style.display = 'block';
+  document.getElementById('appView').style.display = 'none';
+}
+function showApp() {
+  document.getElementById('loginView').style.display = 'none';
+  document.getElementById('appView').style.display = 'block';
+  document.getElementById('userInfo').innerHTML =
+    `${escapeHtml(currentUser.nama)} <span class="role-tag">${escapeHtml(currentUser.role)}</span>`;
+  loadAll();
+  getLocation();
+  startPolling();
+}
+if (pin && currentUser) {
+  postApi({ action: 'login', pin }).then(r => {
+    if (r.success) { currentUser = r.user; showApp(); } else logout();
+  }).catch(() => logout());
+} else {
+  document.getElementById('loginView').style.display = 'block';
 }
 
 // ============ TABS ============
-function switchTab(name) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  event.target.classList.add('active');
-  document.getElementById('tab-projects').style.display = name === 'projects' ? 'block' : 'none';
-  document.getElementById('tab-tasks').style.display = name === 'tasks' ? 'block' : 'none';
+function showTab(tab) {
+  ['list','projects','gantt','map','add','log'].forEach(t => {
+    document.getElementById('view-' + t).style.display = t === tab ? 'block' : 'none';
+    document.getElementById('tab-' + t).classList.toggle('active', t === tab);
+  });
+  if (tab === 'map') setTimeout(renderMap, 100);
+  if (tab === 'gantt') setTimeout(renderGantt, 100);
+  if (tab === 'log') loadLog();
+  if (tab === 'projects') renderProjects();
 }
 
-// ============ PROJECTS ============
-function renderProjects() {
-  const el = document.getElementById('projList');
-  if (state.projects.length === 0) {
-    el.innerHTML = '<div class="empty">Belum ada proyek. Tambahkan proyek pertama Anda.</div>';
-    return;
+// ============ LOAD ============
+async function loadAll() {
+  await Promise.all([loadProjects(), loadTasks()]);
+}
+async function loadProjects() {
+  try {
+    const r = await fetch(`${API_URL}?action=getProjects`).then(x => x.json());
+    if (!r.success) throw new Error(r.message);
+    allProjects = r.data || [];
+    populateProjectSelectors();
+    renderProjects();
+  } catch (e) { toast('❌ Proyek: ' + e.message); }
+}
+function populateProjectSelectors() {
+  const opts = '<option value="">📁 Semua Proyek</option>' +
+    allProjects.map(p => `<option value="${p.ID}">${escapeHtml(p['Nama Proyek'])}</option>`).join('');
+  const optsEmpty = '<option value="">— Tanpa proyek —</option>' +
+    allProjects.map(p => `<option value="${p.ID}">${escapeHtml(p['Nama Proyek'])}</option>`).join('');
+  document.getElementById('projectFilter').innerHTML = opts;
+  document.getElementById('ganttProjectFilter').innerHTML = opts;
+  document.getElementById('addProjectSelect').innerHTML = optsEmpty;
+  document.getElementById('editProjectSelect').innerHTML = optsEmpty;
+}
+async function loadTasks() {
+  const box = document.getElementById('tasks');
+  const loading = document.getElementById('loading');
+  loading.style.display = 'block';
+  try {
+    const r = await fetch(`${API_URL}?action=getTasks`).then(x => x.json());
+    loading.style.display = 'none';
+    if (!r.success) throw new Error(r.message);
+    allTasks = (r.data || []).reverse();
+    renderStats(); renderTasks();
+    if (allTasks.length > lastTaskCount && lastTaskCount > 0)
+      notify(`Ada ${allTasks.length - lastTaskCount} tugas baru`);
+    lastTaskCount = allTasks.length;
+  } catch (e) {
+    loading.style.display = 'none';
+    box.innerHTML = `<div class="empty">❌ ${e.message}</div>`;
   }
-  el.innerHTML = state.projects.map(p => `
-    <div class="item">
-      <div class="item-head">
-        <div>
-          <div class="item-title">${esc(p.namaProyek)}</div>
-          <div class="item-sub">📍 ${esc(p.lokasi || '-')} · PIC: ${esc(p.pic || '-')}</div>
-          <div class="item-sub">📅 ${p.mulai || '-'} → ${p.selesai || '-'}</div>
-        </div>
-        <span class="badge ${p.status}">${p.status}</span>
-      </div>
-      <div style="font-size:12px;color:#666">Progres: ${p.progres || 0}%</div>
-      <div class="progress-bar"><div class="progress-fill" style="width:${p.progres || 0}%"></div></div>
-      <div class="actions">
-        <button class="btn btn-sm btn-outline" onclick="editProject('${p.id}')">✏️ Edit</button>
-        <button class="btn btn-sm btn-danger" onclick="hapusProject('${p.id}','${esc(p.namaProyek)}')">🗑️ Hapus</button>
-      </div>
-    </div>
-  `).join('');
 }
-
-function editProject(id) {
-  const p = state.projects.find(x => x.id === id);
-  if (!p) return;
-  document.getElementById('p_id').value = p.id;
-  document.getElementById('p_nama').value = p.namaProyek;
-  document.getElementById('p_lokasi').value = p.lokasi;
-  document.getElementById('p_mulai').value = p.mulai;
-  document.getElementById('p_selesai').value = p.selesai;
-  document.getElementById('p_status').value = p.status;
-  document.getElementById('p_pic').value = p.pic;
-  document.getElementById('p_progres').value = p.progres;
-  document.getElementById('projFormTitle').textContent = '✏️ Edit Proyek';
-  document.getElementById('p_cancel').style.display = 'inline-block';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+function renderStats() {
+  const t = allTasks.length;
+  const b = allTasks.filter(x => x['Status']==='Baru').length;
+  const p = allTasks.filter(x => x['Status']==='Proses').length;
+  const s = allTasks.filter(x => x['Status']==='Selesai').length;
+  document.getElementById('stats').innerHTML = `
+    <div class="stat-box"><div class="num">${t}</div><div class="lbl">Total</div></div>
+    <div class="stat-box"><div class="num" style="color:#1e40af">${b}</div><div class="lbl">Baru</div></div>
+    <div class="stat-box"><div class="num" style="color:#b45309">${p}</div><div class="lbl">Proses</div></div>
+    <div class="stat-box"><div class="num" style="color:#15803d">${s}</div><div class="lbl">Selesai</div></div>`;
 }
-
-async function saveProject() {
-  const data = {
-    namaProyek: document.getElementById('p_nama').value.trim(),
-    lokasi: document.getElementById('p_lokasi').value.trim(),
-    mulai: document.getElementById('p_mulai').value,
-    selesai: document.getElementById('p_selesai').value,
-    status: document.getElementById('p_status').value,
-    pic: document.getElementById('p_pic').value.trim(),
-    progres: Number(document.getElementById('p_progres').value) || 0
-  };
-  if (!data.namaProyek) return toast('Nama proyek wajib diisi', true);
-
-  const id = document.getElementById('p_id').value;
-  try {
-    if (id) {
-      data.id = id;
-      await api('updateProject', { data });
-      toast('Proyek diperbarui');
-    } else {
-      await api('addProject', { data });
-      toast('Proyek ditambahkan');
-    }
-    resetProjectForm();
-    await loadAll();
-  } catch (e) { toast(e.message, true); }
-}
-
-async function hapusProject(id, nama) {
-  if (!confirm(`Hapus proyek "${nama}"? Tugas terkait juga akan terhapus.`)) return;
-  try {
-    await api('deleteProject', { id });
-    toast('Proyek dihapus');
-    await loadAll();
-  } catch (e) { toast(e.message, true); }
-}
-
-function resetProjectForm() {
-  ['p_id','p_nama','p_lokasi','p_mulai','p_selesai','p_pic'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('p_status').value = 'planning';
-  document.getElementById('p_progres').value = 0;
-  document.getElementById('projFormTitle').textContent = '➕ Tambah Proyek';
-  document.getElementById('p_cancel').style.display = 'none';
-}
-
-// ============ TASKS ============
-function renderProjectOptions() {
-  const sel = document.getElementById('t_projectId');
-  sel.innerHTML = '<option value="">-- Pilih Proyek --</option>' +
-    state.projects.map(p => `<option value="${p.id}">${esc(p.namaProyek)}</option>`).join('');
-}
-
 function renderTasks() {
-  const el = document.getElementById('taskList');
-  if (state.tasks.length === 0) {
-    el.innerHTML = '<div class="empty">Belum ada tugas.</div>';
-    return;
-  }
-  el.innerHTML = state.tasks.map(t => {
-    const proj = state.projects.find(p => p.id === t.projectId);
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const fs = document.getElementById('filterStatus').value;
+  const fp = document.getElementById('filterPrioritas').value;
+  const sort = document.getElementById('sortBy').value;
+  const projId = document.getElementById('projectFilter').value;
+
+  let filtered = allTasks.filter(t => {
+    const text = [t['Nama Tugas'], t['Lokasi'], t['Penanggung Jawab']].join(' ').toLowerCase();
+    return (!q || text.includes(q)) && (!fs || t['Status']===fs) && (!fp || t['Prioritas']===fp)
+        && (!projId || t['Project ID']===projId);
+  });
+  if (sort==='deadline') filtered.sort((a,b)=> new Date(a['Deadline']||0)-new Date(b['Deadline']||0));
+  else if (sort==='prioritas') {
+    const r={Tinggi:1,Sedang:2,Rendah:3};
+    filtered.sort((a,b)=>(r[a['Prioritas']]||9)-(r[b['Prioritas']]||9));
+  } else if (sort==='nama') filtered.sort((a,b)=>(a['Nama Tugas']||'').localeCompare(b['Nama Tugas']||''));
+
+  const box = document.getElementById('tasks');
+  if (!filtered.length) { box.innerHTML = '<div class="empty">Tidak ada tugas cocok.</div>'; return; }
+
+  box.innerHTML = filtered.map(t => {
+    let fotos = [];
+    try { fotos = JSON.parse(t['Foto URL']||'[]'); } catch { fotos = t['Foto URL'] ? [t['Foto URL']] : []; }
+    const kom = t.komentarList || [];
+    const isAdmin = currentUser && currentUser.role === 'admin';
+    const pname = projectName(t['Project ID']);
     return `
-      <div class="item">
-        <div class="item-head">
-          <div>
-            <div class="item-title">${esc(t.judul)}</div>
-            <div class="item-sub">📁 ${esc(proj ? proj.namaProyek : '(proyek dihapus)')}</div>
-            <div class="item-sub">👤 ${esc(t.assignee || '-')} · 📅 ${t.deadline || '-'}</div>
-            ${t.catatan ? `<div class="item-sub">📝 ${esc(t.catatan)}</div>` : ''}
-          </div>
-          <span class="badge ${t.status}">${t.status}</span>
-        </div>
-        <div class="actions">
-          <button class="btn btn-sm btn-outline" onclick="editTask('${t.id}')">✏️ Edit</button>
-          <button class="btn btn-sm btn-danger" onclick="hapusTask('${t.id}','${esc(t.judul)}')">🗑️ Hapus</button>
-        </div>
+    <div class="card">
+      ${pname ? `<span class="badge Proyek">📁 ${escapeHtml(pname)}</span>` : ''}
+      <h3>${escapeHtml(t['Nama Tugas']||'-')}</h3>
+      <p>📍 ${escapeHtml(t['Lokasi']||'-')}</p>
+      <p>👤 ${escapeHtml(t['Penanggung Jawab']||'-')} · 📅 ${formatDate(t['Deadline'])}</p>
+      <div>
+        <span class="badge ${t['Status']||'Baru'}">${t['Status']||'Baru'}</span>
+        <span class="badge ${t['Prioritas']||'Sedang'}">${t['Prioritas']||'Sedang'}</span>
+        ${kom.length ? `<span class="badge" style="background:#e2e8f0;color:#334155">💬 ${kom.length}</span>` : ''}
+        ${t['Signature URL'] ? `<span class="badge Selesai">✍️ Signed</span>` : ''}
       </div>
-    `;
+      ${fotos.length ? `<div class="foto-grid">${fotos.slice(0,3).map(u=>`<img src="${u}" onclick="window.open('${u}','_blank')">`).join('')}</div>` : ''}
+      <div class="btn-group">
+        <button class="btn btn-secondary" onclick="showDetail('${t['ID']}')">Detail</button>
+        ${t['Status']!=='Proses' ? `<button class="btn btn-warning" onclick="updateStatus('${t['ID']}','Proses')">Proses</button>` : ''}
+        ${t['Status']!=='Selesai' ? `<button class="btn btn-success" onclick="updateStatus('${t['ID']}','Selesai')">Selesai</button>` : ''}
+        <button class="btn btn-secondary" onclick='openEdit(${JSON.stringify(t).replace(/'/g,"&apos;")})'>Edit</button>
+        ${isAdmin ? `<button class="btn btn-danger" onclick="deleteTask('${t['ID']}')">Hapus</button>` : ''}
+      </div>
+    </div>`;
   }).join('');
 }
 
-function editTask(id) {
-  const t = state.tasks.find(x => x.id === id);
+// ============ PROJECTS RENDER ============
+function renderProjects() {
+  const box = document.getElementById('projectList');
+  if (!allProjects.length) { box.innerHTML = '<div class="empty">Belum ada proyek.</div>'; return; }
+  const isAdmin = currentUser && currentUser.role === 'admin';
+  box.innerHTML = allProjects.reverse().map(p => `
+    <div class="card">
+      <h3>📁 ${escapeHtml(p['Nama Proyek'])}</h3>
+      <p>${escapeHtml(p['Deskripsi']||'-')}</p>
+      <p>📍 ${escapeHtml(p['Lokasi']||'-')} · 👤 ${escapeHtml(p['PIC']||'-')}</p>
+      <p>📅 ${formatDate(p['Mulai'])} → ${formatDate(p['Selesai'])}</p>
+      <div><span class="badge Aktif">${escapeHtml(p['Status']||'Aktif')}</span></div>
+      ${isAdmin ? `<div class="btn-group"><button class="btn btn-danger" onclick="deleteProject('${p['ID']}')">Hapus Proyek</button></div>` : ''}
+    </div>
+  `).join('');
+  allProjects.reverse();
+}
+async function submitProject(e) {
+  e.preventDefault();
+  const f = e.target;
+  const btn = document.getElementById('projBtn');
+  btn.disabled = true; btn.textContent = 'Menyimpan...';
+  try {
+    const r = await postApi({
+      action: 'addProject', nama: f.nama.value, deskripsi: f.deskripsi.value,
+      lokasi: f.lokasi.value, mulai: f.mulai.value, selesai: f.selesai.value,
+      pic: f.pic.value, pin
+    });
+    if (r.success) { toast('✅ Proyek ditambahkan'); f.reset(); loadProjects(); }
+    else toast('❌ ' + r.message);
+  } catch (e) { toast('❌ ' + e.message); }
+  finally { btn.disabled = false; btn.textContent = 'Simpan Proyek'; }
+}
+async function deleteProject(id) {
+  if (!confirm('Hapus proyek ini? (Tugas terkait tetap ada)')) return;
+  try {
+    const r = await postApi({ action: 'deleteProject', id, pin });
+    if (r.success) { toast('🗑️ Proyek dihapus'); loadProjects(); } else toast('❌ ' + r.message);
+  } catch (e) { toast('❌ ' + e.message); }
+}
+
+// ============ AKSI TASK ============
+async function updateStatus(id, status) {
+  try {
+    const r = await postApi({ action:'updateStatus', id, status, pin });
+    if (r.success) { toast('✅ Status diperbarui'); loadTasks(); } else toast('❌ ' + r.message);
+  } catch (e) { toast('❌ ' + e.message); }
+}
+async function deleteTask(id) {
+  if (!confirm('Yakin hapus?')) return;
+  try {
+    const r = await postApi({ action:'deleteTask', id, pin });
+    if (r.success) { toast('🗑️ Dihapus'); loadTasks(); } else toast('❌ ' + r.message);
+  } catch (e) { toast('❌ ' + e.message); }
+}
+function openEdit(t) {
+  const f = document.getElementById('editForm');
+  f.id.value = t['ID'];
+  f.projectId.value = t['Project ID'] || '';
+  f.nama.value = t['Nama Tugas'] || '';
+  f.lokasi.value = t['Lokasi'] || '';
+  f.penanggungJawab.value = t['Penanggung Jawab'] || '';
+  f.startDate.value = t['Start Date'] ? String(t['Start Date']).substring(0,10) : '';
+  f.deadline.value = t['Deadline'] ? String(t['Deadline']).substring(0,10) : '';
+  f.prioritas.value = t['Prioritas'] || 'Sedang';
+  document.getElementById('editModal').classList.add('show');
+}
+function closeEdit() { document.getElementById('editModal').classList.remove('show'); }
+async function saveEdit(e) {
+  e.preventDefault(); const f = e.target;
+  try {
+    const r = await postApi({
+      action:'editTask', id:f.id.value, projectId:f.projectId.value,
+      nama:f.nama.value, lokasi:f.lokasi.value, penanggungJawab:f.penanggungJawab.value,
+      startDate:f.startDate.value, deadline:f.deadline.value, prioritas:f.prioritas.value, pin
+    });
+    if (r.success) { toast('✅ Diperbarui'); closeEdit(); loadTasks(); } else toast('❌ ' + r.message);
+  } catch (e) { toast('❌ ' + e.message); }
+}
+
+// ============ DETAIL ============
+function showDetail(id) {
+  const t = allTasks.find(x => x['ID'] === id);
   if (!t) return;
-  document.getElementById('t_id').value = t.id;
-  document.getElementById('t_projectId').value = t.projectId;
-  document.getElementById('t_judul').value = t.judul;
-  document.getElementById('t_assignee').value = t.assignee;
-  document.getElementById('t_deadline').value = t.deadline;
-  document.getElementById('t_status').value = t.status;
-  document.getElementById('t_catatan').value = t.catatan;
-  document.getElementById('taskFormTitle').textContent = '✏️ Edit Tugas';
-  document.getElementById('t_cancel').style.display = 'inline-block';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  let fotos = [];
+  try { fotos = JSON.parse(t['Foto URL']||'[]'); } catch { fotos = t['Foto URL'] ? [t['Foto URL']] : []; }
+  const kom = t.komentarList || [];
+  const pname = projectName(t['Project ID']);
+  document.getElementById('detailTitle').textContent = t['Nama Tugas'];
+  document.getElementById('detailBody').innerHTML = `
+    ${pname ? `<span class="badge Proyek">📁 ${escapeHtml(pname)}</span>` : ''}
+    <p style="font-size:13px;margin-bottom:6px"><b>Lokasi:</b> ${escapeHtml(t['Lokasi'])}</p>
+    <p style="font-size:13px;margin-bottom:6px"><b>PJ:</b> ${escapeHtml(t['Penanggung Jawab']||'-')}</p>
+    <p style="font-size:13px;margin-bottom:6px"><b>Start:</b> ${formatDate(t['Start Date'])} · <b>Deadline:</b> ${formatDate(t['Deadline'])}</p>
+    <p style="font-size:13px;margin-bottom:6px"><b>Status:</b> ${escapeHtml(t['Status']||'Baru')} · <b>Prioritas:</b> ${escapeHtml(t['Prioritas']||'Sedang')}</p>
+    ${t['Latitude'] ? `<p style="font-size:11px;color:var(--muted)">📍 ${t['Latitude']}, ${t['Longitude']}</p>` : ''}
+    ${t['Signature URL'] ? `<p style="margin-top:8px"><b>Tanda Tangan:</b></p><img src="${t['Signature URL']}" class="sig-preview">` : ''}
+    ${fotos.length ? `<div class="foto-grid">${fotos.map(u=>`<img src="${u}" onclick="window.open('${u}','_blank')">`).join('')}</div>` : ''}
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="openSig('${t['ID']}')">✍️ Tanda Tangan</button>
+    </div>
+    <hr style="margin:12px 0;border:none;border-top:1px solid var(--border)">
+    <b style="font-size:13px">Komentar</b>
+    <div style="margin-top:6px">${kom.length ? kom.map(k=>`
+      <div class="komentar-item"><div class="meta">${escapeHtml(k.user)} · ${new Date(k.waktu).toLocaleString('id-ID')}</div>${escapeHtml(k.isi)}</div>
+    `).join('') : '<p style="font-size:12px;color:var(--muted)">Belum ada komentar</p>'}</div>
+    <textarea id="komInput" placeholder="Tulis komentar..." style="margin-top:8px" rows="2"></textarea>
+    <button class="btn btn-primary" style="width:100%;margin-top:6px" onclick="addComment('${t['ID']}')">Kirim Komentar</button>`;
+  document.getElementById('detailModal').classList.add('show');
+}
+function closeDetail() { document.getElementById('detailModal').classList.remove('show'); }
+async function addComment(id) {
+  const isi = document.getElementById('komInput').value.trim();
+  if (!isi) return toast('Komentar kosong');
+  try {
+    const r = await postApi({ action:'addComment', id, komentar: isi, pin });
+    if (r.success) { toast('💬 Dikirim'); closeDetail(); loadTasks(); } else toast('❌ ' + r.message);
+  } catch (e) { toast('❌ ' + e.message); }
 }
 
-async function saveTask() {
-  const data = {
-    projectId: document.getElementById('t_projectId').value,
-    judul: document.getElementById('t_judul').value.trim(),
-    assignee: document.getElementById('t_assignee').value.trim(),
-    deadline: document.getElementById('t_deadline').value,
-    status: document.getElementById('t_status').value,
-    catatan: document.getElementById('t_catatan').value.trim()
-  };
-  if (!data.projectId) return toast('Pilih proyek dulu', true);
-  if (!data.judul) return toast('Judul tugas wajib diisi', true);
-
-  const id = document.getElementById('t_id').value;
+// ============ SIGNATURE ============
+function openSig(taskId) {
+  sigTaskId = taskId;
+  closeDetail();
+  document.getElementById('sigModal').classList.add('show');
+  setTimeout(() => {
+    const canvas = document.getElementById('sigCanvas');
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+    if (sigPad) sigPad.off();
+    sigPad = new SignaturePad(canvas, { backgroundColor: 'rgba(255,255,255,0)' });
+  }, 100);
+}
+function clearSig() { if (sigPad) sigPad.clear(); }
+function closeSig() { document.getElementById('sigModal').classList.remove('show'); }
+async function saveSig() {
+  if (!sigPad || sigPad.isEmpty()) return toast('Tanda tangan kosong');
+  const dataUrl = sigPad.toDataURL('image/png');
+  const base64 = dataUrl.split(',')[1];
   try {
-    if (id) {
-      data.id = id;
-      await api('updateTask', { data });
-      toast('Tugas diperbarui');
-    } else {
-      await api('addTask', { data });
-      toast('Tugas ditambahkan');
+    const r = await postApi({ action:'uploadSignature', id: sigTaskId, base64, pin });
+    if (r.success) { toast('✅ Tanda tangan disimpan'); closeSig(); loadTasks(); }
+    else toast('❌ ' + r.message);
+  } catch (e) { toast('❌ ' + e.message); }
+}
+
+// ============ GANTT ============
+function renderGantt() {
+  const box = document.getElementById('gantt');
+  const projId = document.getElementById('ganttProjectFilter').value;
+  const filtered = allTasks.filter(t => (!projId || t['Project ID']===projId) && t['Start Date'] && t['Deadline']);
+  if (!filtered.length) {
+    box.innerHTML = '<div class="empty">Tidak ada tugas dengan Start Date & Deadline.</div>';
+    return;
+  }
+  box.innerHTML = '<div id="gantt-inner"></div>';
+  const tasks = filtered.map(t => ({
+    id: t['ID'],
+    name: t['Nama Tugas'],
+    start: String(t['Start Date']).substring(0,10),
+    end: String(t['Deadline']).substring(0,10),
+    progress: t['Status']==='Selesai' ? 100 : t['Status']==='Proses' ? 50 : 0,
+    custom_class: 'bar-' + (t['Status']||'Baru')
+  }));
+  ganttInstance = new Gantt('#gantt-inner', tasks, {
+    view_mode: 'Day',
+    language: 'id',
+    on_click: task => { showDetail(task.id); }
+  });
+}
+
+// ============ MAP ============
+function renderMap() {
+  if (!mapInstance) {
+    mapInstance = L.map('map').setView([-2.5, 118], 5);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(mapInstance);
+  }
+  mapMarkers.forEach(m => mapInstance.removeLayer(m));
+  mapMarkers = [];
+  const valid = allTasks.filter(t => t['Latitude'] && t['Longitude']);
+  if (!valid.length) return;
+  valid.forEach(t => {
+    const m = L.marker([parseFloat(t['Latitude']), parseFloat(t['Longitude'])])
+      .addTo(mapInstance)
+      .bindPopup(`<b>${escapeHtml(t['Nama Tugas'])}</b><br>${escapeHtml(t['Lokasi'])}`);
+    mapMarkers.push(m);
+  });
+  mapInstance.fitBounds(L.latLngBounds(valid.map(t => [parseFloat(t['Latitude']), parseFloat(t['Longitude'])])), { padding: [30,30] });
+}
+
+// ============ GPS ============
+function getLocation() {
+  if (!navigator.geolocation) { document.getElementById('gpsInfo').textContent = 'GPS tidak didukung'; return; }
+  navigator.geolocation.getCurrentPosition(
+    p => {
+      currentLocation.lat = p.coords.latitude.toFixed(6);
+      currentLocation.lng = p.coords.longitude.toFixed(6);
+      document.getElementById('gpsInfo').textContent = `📍 ${currentLocation.lat}, ${currentLocation.lng}`;
+    },
+    () => { document.getElementById('gpsInfo').textContent = '📍 GPS opsional'; },
+    { enableHighAccuracy: true, timeout: 8000 }
+  );
+}
+
+// ============ SUBMIT TASK ============
+function fileToBase64(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result.split(',')[1]);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+async function uploadFoto(file) {
+  const b64 = await fileToBase64(file);
+  const r = await postApi({ action:'uploadFoto', base64:b64, mimeType:file.type, filename:'foto_'+Date.now()+'_'+file.name });
+  if (!r.success) throw new Error(r.message);
+  return r.url;
+}
+async function submitTask(e) {
+  e.preventDefault();
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true; btn.textContent = 'Mengirim...';
+  try {
+    const f = e.target;
+    const data = {
+      action:'addTask', projectId:f.projectId.value, nama:f.nama.value, lokasi:f.lokasi.value,
+      penanggungJawab:f.penanggungJawab.value, startDate:f.startDate.value, deadline:f.deadline.value,
+      prioritas:f.prioritas.value, latitude:currentLocation.lat, longitude:currentLocation.lng,
+      pin, fotoUrls: []
+    };
+    const files = document.getElementById('fotoInput').files;
+    if (files.length) {
+      btn.textContent = `Upload ${files.length} foto...`;
+      for (const file of files) data.fotoUrls.push(await uploadFoto(file));
     }
-    resetTaskForm();
-    await loadAll();
-  } catch (e) { toast(e.message, true); }
+    btn.textContent = 'Menyimpan...';
+    const r = await postApi(data);
+    if (r.success) {
+      toast('✅ Tugas ditambahkan');
+      f.reset(); currentLocation = { lat:'', lng:'' }; getLocation();
+      showTab('list');
+    } else toast('❌ ' + r.message);
+  } catch (e) { toast('❌ ' + e.message); }
+  finally { btn.disabled = false; btn.textContent = 'Kirim Tugas'; }
 }
 
-async function hapusTask(id, judul) {
-  if (!confirm(`Hapus tugas "${judul}"?`)) return;
+// ============ LOG ============
+async function loadLog() {
+  const box = document.getElementById('logList');
+  box.innerHTML = '<div class="loading">Memuat...</div>';
   try {
-    await api('deleteTask', { id });
-    toast('Tugas dihapus');
-    await loadAll();
-  } catch (e) { toast(e.message, true); }
+    const r = await fetch(`${API_URL}?action=getLog&pin=${encodeURIComponent(pin)}`).then(x => x.json());
+    if (!r.success) throw new Error(r.message);
+    if (!r.data.length) { box.innerHTML = '<div class="empty">Belum ada aktivitas.</div>'; return; }
+    box.innerHTML = r.data.map(l => `
+      <div class="log-item">
+        <div><b>${escapeHtml(l['Aksi'])}</b> · ${escapeHtml(l['Entity']||'')} ${escapeHtml(l['Entity ID']||'')}
+          ${l['Field'] ? `<br><span class="delta">${escapeHtml(l['Field'])}: "${escapeHtml(l['Old Value'])}" → "${escapeHtml(l['New Value'])}"</span>` : ''}
+        </div>
+        <div class="time">${escapeHtml(l['User']||'-')} · ${formatDate(l['Timestamp'])}</div>
+      </div>`).join('');
+  } catch (e) { box.innerHTML = `<div class="empty">❌ ${e.message}</div>`; }
 }
 
-function resetTaskForm() {
-  ['t_id','t_judul','t_assignee','t_deadline','t_catatan'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('t_projectId').value = '';
-  document.getElementById('t_status').value = 'todo';
-  document.getElementById('taskFormTitle').textContent = '➕ Tambah Tugas';
-  document.getElementById('t_cancel').style.display = 'none';
+// ============ EXPORT ============
+function exportCSV() {
+  const headers = ['Proyek','Nama Tugas','Lokasi','Penanggung Jawab','Start','Deadline','Prioritas','Status'];
+  const rows = allTasks.map(t => headers.map(h => {
+    let v = '';
+    if (h === 'Proyek') v = projectName(t['Project ID']);
+    else if (h === 'Start') v = t['Start Date'] || '';
+    else v = t[h] || '';
+    return `"${String(v).replace(/"/g,'""')}"`;
+  }).join(','));
+  downloadBlob([headers.join(','), ...rows].join('\n'), 'tugas.csv', 'text/csv');
+  toast('📊 CSV diunduh');
+}
+function exportPDF() {
+  const win = window.open('', '_blank');
+  win.document.write(`
+    <html><head><title>Laporan Tugas</title>
+    <style>body{font-family:sans-serif;padding:20px}h1{font-size:18px}table{width:100%;border-collapse:collapse;margin-top:12px;font-size:12px}
+    th,td{border:1px solid #ccc;padding:6px;text-align:left}th{background:#1e40af;color:#fff}</style></head><body>
+    <h1>Laporan Tugas Proyek</h1><p>Dicetak: ${new Date().toLocaleString('id-ID')}</p>
+    <table><tr><th>Proyek</th><th>Nama</th><th>Lokasi</th><th>PJ</th><th>Start</th><th>Deadline</th><th>Status</th></tr>
+    ${allTasks.map(t => `<tr><td>${escapeHtml(projectName(t['Project ID']))}</td><td>${escapeHtml(t['Nama Tugas'])}</td>
+      <td>${escapeHtml(t['Lokasi'])}</td><td>${escapeHtml(t['Penanggung Jawab']||'-')}</td>
+      <td>${formatDate(t['Start Date'])}</td><td>${formatDate(t['Deadline'])}</td>
+      <td>${escapeHtml(t['Status']||'Baru')}</td></tr>`).join('')}
+    </table></body></html>`);
+  win.document.close();
+  setTimeout(() => win.print(), 500);
+}
+async function backupJSON() {
+  try {
+    const r = await fetch(`${API_URL}?action=backup&pin=${encodeURIComponent(pin)}`).then(x => x.json());
+    if (!r.success) throw new Error(r.message);
+    downloadBlob(JSON.stringify(r.data, null, 2), `backup_${Date.now()}.json`, 'application/json');
+    toast('💾 Backup diunduh');
+  } catch (e) { toast('❌ ' + e.message); }
+}
+function downloadBlob(content, filename, mime) {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
 }
 
-// ============ UTIL ============
-function esc(s) {
-  return String(s == null ? '' : s)
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+// ============ NOTIF ============
+async function enableNotif() {
+  if (!('Notification' in window)) return toast('Browser tidak mendukung notifikasi');
+  if (Notification.permission === 'granted') return toast('Notifikasi sudah aktif');
+  const p = await Notification.requestPermission();
+  if (p === 'granted') toast('🔔 Notifikasi aktif');
+}
+function notify(msg) {
+  if (Notification.permission === 'granted') new Notification('Proyek Lapangan', { body: msg });
 }
 
-// ============ INIT ============
-loadAll();
+// ============ POLLING ============
+function startPolling() {
+  if (pollingTimer) clearInterval(pollingTimer);
+  pollingTimer = setInterval(() => {
+    if (document.visibilityState === 'visible' && pin) loadTasks();
+  }, 60000);
+}
+
+// ============ PWA ============
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+
+document.getElementById('pinInput')?.addEventListener('keypress', e => {
+  if (e.key === 'Enter') doLogin();
+});
 </script>
 </body>
 </html>
