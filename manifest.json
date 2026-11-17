@@ -1,0 +1,14 @@
+{
+  "name": "Manajemen Proyek Lapangan v2",
+  "short_name": "ProyekLapangan",
+  "description": "Aplikasi lengkap manajemen proyek lapangan",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f1f5f9",
+  "theme_color": "#1e40af",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "https://via.placeholder.com/192/1e40af/ffffff?text=PL", "sizes": "192x192", "type": "image/png" },
+    { "src": "https://via.placeholder.com/512/1e40af/ffffff?text=PL", "sizes": "512x512", "type": "image/png" }
+  ]
+}
