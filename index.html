@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#0f172a" />
+  <link rel="manifest" href="data:application/manifest+json,%7B%22id%22%3A%22.%2F%22%2C%22name%22%3A%22PUGUH-JOGJA%20%7C%20Sistem%20Manajemen%20Proyek%20Lapangan%22%2C%22short_name%22%3A%22PUGUH-JOGJA%22%2C%22description%22%3A%22Aplikasi%20manajemen%20proyek%20lapangan%20PUGUH-JOGJA%22%2C%22start_url%22%3A%22.%2Findex.html%22%2C%22scope%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22display_override%22%3A%5B%22standalone%22%2C%22minimal-ui%22%5D%2C%22orientation%22%3A%22any%22%2C%22background_color%22%3A%22%230f172a%22%2C%22theme_color%22%3A%22%230f172a%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20512%20512%27%253E%253Crect%20width%3D%27512%27%20height%3D%27512%27%20rx%3D%27112%27%20fill%3D%27%2523f59e0b%27%2F%253E%253Ctext%20x%3D%2750%2525%27%20y%3D%2756%2525%27%20text-anchor%3D%27middle%27%20font-family%3D%27Arial%2Csans-serif%27%20font-size%3D%27220%27%20font-weight%3D%27800%27%20fill%3D%27%2523ffffff%27%253EPJ%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22any%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D" />
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20512%20512%27%3E%3Crect%20width%3D%27512%27%20height%3D%27512%27%20rx%3D%27112%27%20fill%3D%27%23f59e0b%27%2F%3E%3Ctext%20x%3D%2750%25%27%20y%3D%2756%25%27%20text-anchor%3D%27middle%27%20font-family%3D%27Arial%2Csans-serif%27%20font-size%3D%27220%27%20font-weight%3D%27800%27%20fill%3D%27%23ffffff%27%3EPJ%3C%2Ftext%3E%3C%2Fsvg%3E" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="PUGUH-JOGJA" />
@@ -286,6 +288,7 @@
     @media (max-width: 420px) {
       #install-app-btn { padding: .55rem .65rem; gap: .35rem; font-size: .68rem; }
       #install-app-btn i { width: 1rem; height: 1rem; }
+      #install-app-label { display: none; }
     }
 
     /* Profil pengguna: nama hitam pada mode terang dan putih pada mode gelap */
@@ -336,6 +339,9 @@
       </button>
 
       <!-- Tulisan diganti menjadi Dibuat Oleh: Tri Puguh Santoso -->
+      <button id="install-app-login-btn" onclick="installApp()" type="button" class="w-full py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs rounded-xl transition-all flex items-center justify-center gap-2 shadow-md">
+        <i data-lucide="download" class="w-4 h-4"></i> Instal Aplikasi ke Perangkat Ini
+      </button>
       <p class="text-center text-xs font-semibold text-slate-500 dark:text-slate-400">Dibuat Oleh: <b class="text-amber-500">Tri Puguh Santoso</b></p>
     </div>
   </div>
@@ -385,7 +391,7 @@
           <i data-lucide="building-2" class="w-5 h-5"></i> Data Proyek
         </button>
         <button onclick="switchTab('rab')" data-tab="rab" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
-          <i data-lucide="calculator" class="w-5 h-5"></i> Pembuatan RAB
+          <i data-lucide="calculator" class="w-5 h-5"></i> Rencana Anggaran Biaya
         </button>
         <button onclick="switchTab('pekerjaan')" data-tab="pekerjaan" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
           <i data-lucide="hard-hat" class="w-5 h-5"></i> Pekerjaan & Before-After
@@ -434,6 +440,9 @@
         </div>
 
         <div class="flex items-center gap-2">
+          <button id="install-app-btn" onclick="installApp()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-amber-500 text-slate-950 hover:bg-amber-400 transition-colors shadow-sm" title="Instal aplikasi ke perangkat ini">
+            <i data-lucide="download" class="w-4 h-4"></i><span id="install-app-label">Instal Aplikasi</span>
+          </button>
 <button onclick="syncFromCloud()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-amber-500 hover:text-white transition-colors" title="Sinkronisasi Spreadsheet">
             <i data-lucide="cloud-sync" class="w-4 h-4"></i>
             <span class="hidden sm:inline">Sync</span>
@@ -465,7 +474,7 @@
               </div>
               <div class="flex flex-wrap gap-2 admin-only">
                 <button onclick="switchTab('rab')" class="px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs rounded-xl shadow-lg transition-all flex items-center gap-2">
-                  <i data-lucide="plus-circle" class="w-4 h-4"></i> Buat RAB Baru
+                  <i data-lucide="plus-circle" class="w-4 h-4"></i> Buat Rencana Anggaran Biaya
                 </button>
                 <button onclick="switchTab('pekerjaan')" class="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white font-semibold text-xs rounded-xl backdrop-blur-sm transition-all flex items-center gap-2">
                   <i data-lucide="camera" class="w-4 h-4"></i> Upload Progress
@@ -567,7 +576,7 @@
         <section id="tab-rab" class="tab-content hidden space-y-6">
           <div class="no-print bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
             <div>
-              <label class="block text-[11px] font-bold uppercase text-slate-400 mb-1">Pilih Proyek RAB</label>
+              <label class="block text-[11px] font-bold uppercase text-slate-400 mb-1">Pilih Proyek untuk Rencana Anggaran Biaya</label>
               <select id="rab-project-select" onchange="renderRAB()" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-sm font-semibold"></select>
             </div>
             <div>
@@ -592,10 +601,10 @@
               <button onclick="openRABModal()" class="admin-only px-3.5 py-2.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-md flex-1" title="Tambah Item">
                 <i data-lucide="plus" class="w-4 h-4"></i> Tambah
               </button>
-              <button onclick="exportToExcel('rab-print-wrapper', 'RAB_Puguh_Jogja.xlsx')" class="px-3.5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-md flex-1" title="Download Excel">
+              <button onclick="exportToExcel('rab-print-wrapper', 'Rencana_Anggaran_Biaya_Puguh_Jogja.xlsx')" class="px-3.5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-md flex-1" title="Download Excel">
                 <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Excel
               </button>
-              <button onclick="exportToPDF('rab-print-wrapper', 'RAB_Puguh_Jogja.pdf')" class="px-3.5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-md flex-1" title="Download PDF">
+              <button onclick="exportToPDF('rab-print-wrapper', 'Rencana_Anggaran_Biaya_Puguh_Jogja.pdf')" class="px-3.5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-md flex-1" title="Download PDF">
                 <i data-lucide="file-text" class="w-4 h-4"></i> PDF
               </button>
               <button onclick="printElement('rab-print-wrapper', 'rab-copies-select')" class="px-3.5 py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-md flex-1" title="Cetak Printer">
@@ -612,7 +621,7 @@
                 <p class="text-xs text-slate-500" id="rab-kop-wa">WhatsApp: -</p>
               </div>
               <div class="text-left sm:text-right">
-                <span class="px-3 py-1 bg-amber-500/15 text-amber-600 font-extrabold text-xs rounded-lg uppercase">RAB</span>
+                <span class="px-3 py-1 bg-amber-500/15 text-amber-600 font-extrabold text-xs rounded-lg uppercase">RENCANA ANGGARAN BIAYA</span>
                 <p class="text-xs font-bold mt-1.5" id="rab-doc-proyek">Proyek: -</p>
                 <p class="text-[11px] text-slate-400" id="rab-doc-klien">Klien: -</p>
               </div>
@@ -634,7 +643,7 @@
                 <tbody id="table-rab-body" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody>
                 <tfoot>
                   <tr class="font-extrabold border-t-2 border-slate-300 dark:border-slate-700">
-                    <td colspan="5" class="p-3 text-right uppercase">Total Estimasi RAB</td>
+                    <td colspan="5" class="p-3 text-right uppercase">TOTAL ESTIMASI RENCANA ANGGARAN BIAYA</td>
                     <td class="p-3 text-right text-amber-600" id="rab-grand-total">Rp 0</td>
                     <td class="p-3 no-print action-col"></td>
                   </tr>
@@ -856,7 +865,7 @@
               <div>
                 <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center mb-3"><i data-lucide="sparkles" class="w-5 h-5"></i></div>
                 <h4 class="font-bold text-sm">1. Modal Data Contoh</h4>
-                <p class="text-xs text-slate-500 mt-1">Isi data simulasi proyek Jogja, RAB, absensi, dan kas.</p>
+                <p class="text-xs text-slate-500 mt-1">Isi data simulasi proyek Jogja, Rencana Anggaran Biaya, absensi, dan kas.</p>
               </div>
               <button onclick="triggerSeedData()" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl">Isi Data Contoh</button>
             </div>
@@ -964,9 +973,65 @@
     let GAS_URL = localStorage.getItem('PUGUH_JOGJA_GAS_URL') || '';
     let cashflowChartInstance = null;
 
+    // ==========================================================
+    // INSTALLASI APLIKASI — PWA, Android, iOS, Windows, macOS
+    // Manifest disematkan sebagai data URL agar repo tetap 2 file.
+    // Browser menentukan dukungan instalasi; tidak ada instal paksa.
+    // ==========================================================
+    let deferredInstallPrompt = null;
+
+    window.addEventListener('beforeinstallprompt', (event) => {
+      event.preventDefault();
+      deferredInstallPrompt = event;
+      const btn = document.getElementById('install-app-btn');
+      const label = document.getElementById('install-app-label');
+      if (btn) btn.classList.remove('hidden');
+      if (label) label.textContent = 'Instal Aplikasi';
+    });
+
+    window.addEventListener('appinstalled', () => {
+      deferredInstallPrompt = null;
+      const label = document.getElementById('install-app-label');
+      if (label) label.textContent = 'Aplikasi Terpasang';
+      showToast('PUGUH-JOGJA berhasil dipasang di perangkat ini.');
+    });
+
+    function isAppStandalone() {
+      return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    }
+
+    async function installApp() {
+      if (isAppStandalone()) {
+        showToast('Aplikasi sudah berjalan dalam mode terpasang.');
+        return;
+      }
+      if (deferredInstallPrompt) {
+        deferredInstallPrompt.prompt();
+        const choice = await deferredInstallPrompt.userChoice;
+        deferredInstallPrompt = null;
+        if (choice && choice.outcome === 'accepted') showToast('Permintaan instalasi diterima.');
+        else showToast('Instalasi belum dilakukan. Anda dapat mencobanya lagi kapan saja.', 'error');
+        return;
+      }
+      const ua = navigator.userAgent || '';
+      let steps = '';
+      if (/iPhone|iPad|iPod/i.test(ua)) {
+        steps = '<ol class="list-decimal pl-5 space-y-2"><li>Buka alamat aplikasi menggunakan <b>Safari</b>.</li><li>Tekan tombol <b>Bagikan</b> (ikon kotak dengan panah ke atas).</li><li>Pilih <b>Tambahkan ke Layar Utama</b>.</li><li>Tekan <b>Tambah</b>.</li></ol>';
+      } else if (/Android/i.test(ua)) {
+        steps = '<ol class="list-decimal pl-5 space-y-2"><li>Buka aplikasi menggunakan <b>Chrome</b> atau browser yang mendukung PWA.</li><li>Tekan menu <b>⋮</b> di pojok browser.</li><li>Pilih <b>Instal aplikasi</b> atau <b>Tambahkan ke layar utama</b>.</li><li>Konfirmasi pemasangan.</li></ol>';
+      } else {
+        steps = '<ol class="list-decimal pl-5 space-y-2"><li>Buka aplikasi menggunakan <b>Chrome</b> atau <b>Microsoft Edge</b>.</li><li>Periksa ikon instal di sisi kanan address bar atau buka menu browser.</li><li>Pilih <b>Install PUGUH-JOGJA</b> / <b>Instal aplikasi</b>, lalu konfirmasi.</li></ol>';
+      }
+      showModal('Instal PUGUH-JOGJA', '<div class="space-y-4 text-sm text-slate-700 dark:text-slate-200"><p class="font-semibold">Ikuti petunjuk sesuai perangkat Anda:</p>' + steps + '<p class="text-xs text-slate-500 dark:text-slate-400">Jika pilihan instal belum tersedia, pastikan aplikasi dibuka dari alamat HTTPS GitHub Pages dan gunakan browser versi terbaru. Browser dan perangkat menentukan apakah instalasi didukung.</p></div>');
+      lucide.createIcons();
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       initTheme();
       lucide.createIcons();
+      const installButton = document.getElementById('install-app-btn');
+      if (installButton && isAppStandalone()) { const installLabel = document.getElementById('install-app-label'); if (installLabel) installLabel.textContent = 'Aplikasi Terpasang'; }
+
       document.getElementById('gas-web-app-url').value = GAS_URL;
 
       loadFromLocalStorage();
@@ -1074,7 +1139,7 @@
       const titles = {
         dashboard: 'Dashboard Utama',
         proyek: 'Manajemen Data Proyek',
-        rab: 'Pembuatan RAB & Cetak PDF',
+        rab: 'Rencana Anggaran Biaya & Cetak PDF',
         pekerjaan: 'Pekerjaan Lapangan (Before & After)',
         pekerja: 'Data Pekerja & Absensi',
         aruskas: 'Arus Kas & Bukti Transaksi',
@@ -1441,7 +1506,7 @@
       const tbody = document.getElementById('table-rab-body');
       let grandTotal = 0;
 
-      tbody.innerHTML = items.length === 0 ? `<tr><td colspan="7" class="p-4 text-center text-slate-400">Belum ada item RAB.</td></tr>` : items.map((r, i) => {
+      tbody.innerHTML = items.length === 0 ? `<tr><td colspan="7" class="p-4 text-center text-slate-400">Belum ada item Rencana Anggaran Biaya.</td></tr>` : items.map((r, i) => {
         const jumlah = (Number(r.volume) || 0) * (Number(r.harga_satuan) || 0);
         grandTotal += jumlah;
         return `
@@ -1463,7 +1528,7 @@
       if (CURRENT_SESSION && CURRENT_SESSION.role === 'viewer') return;
       const proyekId = document.getElementById('rab-project-select').value;
       if (!proyekId) return showToast('Pilih proyek terlebih dahulu.', 'error');
-      showModal('Tambah Item RAB', `
+      showModal('Tambah Item Rencana Anggaran Biaya', `
         <form onsubmit="submitRAB(event)" class="space-y-3 text-sm">
           <input type="hidden" name="proyek_id" value="${proyekId}">
           <div><label class="text-xs font-bold">Kategori</label><input required name="kategori" placeholder="Contoh: Pekerjaan Struktur" class="w-full mt-1 px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700"></div>
@@ -1484,7 +1549,7 @@
       record.id = 'RAB-' + Date.now();
       record.jumlah = String((Number(record.volume) || 0) * (Number(record.harga_satuan) || 0));
       APP_STATE.RAB.push(record);
-      closeModal(); showToast('RAB ditambahkan!');
+      closeModal(); showToast('Item Rencana Anggaran Biaya ditambahkan!');
       postToBackend({ action: 'save', table: 'RAB', record });
     }
 
@@ -1910,7 +1975,7 @@
     }
 
     function openPrinterModal() {
-      showModal('Pengaturan Printer', `<p class="text-xs text-slate-500">Gunakan tombol download Excel, PDF, atau cetak salinan pada menu RAB atau Laporan untuk mengunduh dokumen.</p>`);
+      showModal('Pengaturan Printer', `<p class="text-xs text-slate-500">Gunakan tombol download Excel, PDF, atau cetak salinan pada menu Rencana Anggaran Biaya atau Laporan untuk mengunduh dokumen.</p>`);
     }
 
     function openUserManagementModal() {
