@@ -840,23 +840,6 @@
             </div>
           </div>
 
-          <div class="no-print bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
-            <div class="flex flex-wrap items-center justify-between gap-2">
-              <div><h3 class="font-extrabold text-sm">Tanda Tangan Pelaksana Proyek</h3><p class="text-xs text-slate-500 mt-1">Tanda tangan akan dicantumkan pada laporan PDF dan hasil cetak.</p></div>
-              <span class="text-[11px] text-slate-400">Gunakan jari, stylus, atau mouse</span>
-            </div>
-            <label class="block text-xs font-bold text-slate-500" for="lap-pelaksana-name">Nama Pelaksana Proyek</label>
-            <input id="lap-pelaksana-name" type="text" placeholder="Masukkan nama pelaksana proyek" class="w-full sm:max-w-md px-3 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-sm" />
-            <div class="max-w-2xl rounded-xl border border-dashed border-slate-300 dark:border-slate-600 bg-white overflow-hidden">
-              <canvas id="lap-pelaksana-signature" width="1000" height="300" aria-label="Area tanda tangan pelaksana proyek" class="block w-full touch-none" style="height:150px;touch-action:none;cursor:crosshair"></canvas>
-            </div>
-            <div class="flex flex-wrap gap-2">
-              <button type="button" onclick="clearPelaksanaSignature()" class="px-4 py-2 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-white text-xs font-bold">Hapus Tanda Tangan</button>
-              <button type="button" onclick="savePelaksanaSignature()" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold">Simpan Tanda Tangan</button>
-              <span id="lap-pelaksana-signature-status" class="self-center text-xs text-slate-500" aria-live="polite"></span>
-            </div>
-          </div>
-
           <div id="laporan-print-wrapper" class="paper-A4 bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-6 overflow-x-auto">
             <div class="border-b border-slate-300 dark:border-slate-700 pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
@@ -871,7 +854,6 @@
 
             <div id="laporan-dynamic-content" class="space-y-6 text-xs sm:text-sm"></div>
             <div id="laporan-manager-signature" class="text-slate-900"></div>
-            <div id="laporan-pelaksana-signature" class="text-slate-900"></div>
 
             <div class="pt-4 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row justify-between items-center text-[11px] text-slate-400 gap-2">
               <span id="lap-footer-note">Dicetak melalui Sistem PUGUH-JOGJA</span>
@@ -1067,7 +1049,6 @@
       initTheme();
       lucide.createIcons();
       setupManagerSignaturePad();
-      setupPelaksanaSignaturePad();
       const installButton = document.getElementById('install-app-btn');
       if (installButton && isAppStandalone()) { const installLabel = document.getElementById('install-app-label'); if (installLabel) installLabel.textContent = 'Aplikasi Terpasang'; }
 
@@ -1868,7 +1849,7 @@
     }
     function setManagerSignatureCanvas(dataUrl) {
       const canvas = getManagerSignatureCanvas();
-      if (!canvas || !dataUrl || !(/^data:image\/(png|jpeg|jpg|webp);base64,/i.test(dataUrl) || /^https:\/\/drive\.google\.com\//i.test(dataUrl))) return;
+      if (!canvas || !dataUrl || !/^data:image\/(png|jpeg|jpg|webp);base64,/i.test(dataUrl)) return;
       const ctx = canvas.getContext('2d'); const img = new Image();
       img.onload = () => { ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.drawImage(img, 0, 0, canvas.width, canvas.height); managerSignatureHasInk = true; };
       img.src = dataUrl;
@@ -1919,66 +1900,6 @@
       const safeImage = /^data:image\/(png|jpeg|jpg|webp);base64,/i.test(image) || /^https:\/\/drive\.google\.com\/(uc\?|file\/d\/)/i.test(image) ? image : '';
       host.innerHTML = safeImage ? `<div class="ml-auto mt-8 w-full max-w-xs text-center text-slate-900 break-inside-avoid"><p class="text-xs mb-2">Mengetahui,</p><p class="text-sm font-bold">Manager Lapangan</p><img src="${safeImage}" alt="Tanda tangan Manager Lapangan" class="mx-auto my-2 object-contain" style="width:220px;height:85px"/><p class="text-sm font-bold underline">${escapeHtml(data.name)}</p><p class="text-[10px] text-slate-500">Manager Lapangan</p></div>` : '<p class="mt-8 text-right text-xs text-slate-500">Gambar tanda tangan tidak valid.</p>';
     }
-    const PELAKSANA_SIGNATURE_KEY = 'PUGUH_JOGJA_PELAKSANA_SIGNATURE_V1';
-    const PELAKSANA_SIGNATURE_ID = 'PELAKSANA_PROYEK';
-    let pelaksanaSignatureDrawing = false;
-    let pelaksanaSignatureHasInk = false;
-    function getPelaksanaSignatureCanvas() { return document.getElementById('lap-pelaksana-signature'); }
-    function getPelaksanaSignatureRecord() {
-      const rows = Array.isArray(APP_STATE.TandaTangan) ? APP_STATE.TandaTangan : [];
-      return rows.find(x => x && x.id === PELAKSANA_SIGNATURE_ID) || null;
-    }
-    function setPelaksanaSignatureCanvas(dataUrl) {
-      const canvas = getPelaksanaSignatureCanvas();
-      if (!canvas || !dataUrl || !(/^data:image\/(png|jpeg|jpg|webp);base64,/i.test(dataUrl) || /^https:\/\/drive\.google\.com\//i.test(dataUrl))) return;
-      const img = new Image();
-      img.onload = () => { const ctx = canvas.getContext('2d'); ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.drawImage(img, 0, 0, canvas.width, canvas.height); pelaksanaSignatureHasInk = true; };
-      img.src = dataUrl;
-    }
-    function setupPelaksanaSignaturePad() {
-      const canvas = getPelaksanaSignatureCanvas(); if (!canvas || canvas.dataset.ready === '1') return;
-      const ctx = canvas.getContext('2d'); ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = '#111827';
-      const point = event => { const rect = canvas.getBoundingClientRect(); return { x: (event.clientX - rect.left) * canvas.width / rect.width, y: (event.clientY - rect.top) * canvas.height / rect.height }; };
-      canvas.addEventListener('pointerdown', event => { event.preventDefault(); canvas.setPointerCapture(event.pointerId); const p = point(event); ctx.beginPath(); ctx.moveTo(p.x, p.y); pelaksanaSignatureDrawing = true; pelaksanaSignatureHasInk = true; });
-      canvas.addEventListener('pointermove', event => { if (!pelaksanaSignatureDrawing) return; event.preventDefault(); const p = point(event); ctx.lineTo(p.x, p.y); ctx.stroke(); });
-      const finish = () => { pelaksanaSignatureDrawing = false; };
-      canvas.addEventListener('pointerup', finish); canvas.addEventListener('pointercancel', finish); canvas.addEventListener('lostpointercapture', finish);
-      canvas.dataset.ready = '1';
-      let saved = null; try { saved = JSON.parse(localStorage.getItem(PELAKSANA_SIGNATURE_KEY) || 'null'); } catch (e) {}
-      if (saved) { const input = document.getElementById('lap-pelaksana-name'); if (input) input.value = saved.name || ''; setPelaksanaSignatureCanvas(saved.image); }
-    }
-    function clearPelaksanaSignature() {
-      const canvas = getPelaksanaSignatureCanvas(); if (canvas) canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
-      pelaksanaSignatureHasInk = false;
-      try { localStorage.removeItem(PELAKSANA_SIGNATURE_KEY); } catch (e) {}
-      APP_STATE.TandaTangan = (APP_STATE.TandaTangan || []).filter(x => x.id !== PELAKSANA_SIGNATURE_ID);
-      const status = document.getElementById('lap-pelaksana-signature-status'); if (status) status.textContent = 'Tanda tangan dihapus.';
-      renderPelaksanaSignatureReport();
-      if (GAS_URL) postToBackend({ action: 'delete', table: 'TandaTangan', id: PELAKSANA_SIGNATURE_ID }); else saveToLocalStorage();
-    }
-    function savePelaksanaSignature() {
-      const canvas = getPelaksanaSignatureCanvas(); const name = (document.getElementById('lap-pelaksana-name')?.value || '').trim();
-      if (!name) { showToast('Masukkan nama Pelaksana Proyek terlebih dahulu.', 'error'); return; }
-      if (!canvas || !pelaksanaSignatureHasInk) { showToast('Bubuhkan tanda tangan Pelaksana Proyek terlebih dahulu.', 'error'); return; }
-      let image; try { image = canvas.toDataURL('image/png'); } catch (e) { showToast('Tanda tangan tidak dapat dibaca. Silakan gambar ulang.', 'error'); return; }
-      const record = { id: PELAKSANA_SIGNATURE_ID, name, image, updatedAt: new Date().toISOString() };
-      APP_STATE.TandaTangan = (APP_STATE.TandaTangan || []).filter(x => x.id !== PELAKSANA_SIGNATURE_ID).concat([record]);
-      try { localStorage.setItem(PELAKSANA_SIGNATURE_KEY, JSON.stringify(record)); } catch (e) { showToast('Penyimpanan lokal penuh. Data akan dikirim ke server jika terhubung.', 'error'); }
-      saveToLocalStorage(); renderPelaksanaSignatureReport();
-      const status = document.getElementById('lap-pelaksana-signature-status'); if (status) status.textContent = GAS_URL ? 'Mengirim tanda tangan ke Google Sheets...' : 'Tersimpan di perangkat. Hubungkan Google Sheets untuk sinkronisasi.';
-      if (GAS_URL) postToBackend({ action: 'save', table: 'TandaTangan', record });
-      else showToast('Tanda tangan tersimpan di perangkat. Hubungkan database untuk sinkronisasi cloud.');
-    }
-    function renderPelaksanaSignatureReport() {
-      const host = document.getElementById('laporan-pelaksana-signature'); if (!host) return;
-      let data = getPelaksanaSignatureRecord();
-      if (!data) { try { data = JSON.parse(localStorage.getItem(PELAKSANA_SIGNATURE_KEY) || 'null'); } catch (e) {} }
-      if (!data || !data.image) { host.innerHTML = '<p class="mt-8 text-right text-xs text-slate-500">Tanda tangan Pelaksana Proyek belum diisi.</p>'; return; }
-      const image = String(data.image);
-      const safeImage = /^data:image\/(png|jpeg|jpg|webp);base64,/i.test(image) || /^https:\/\/drive\.google\.com\/(uc\?|file\/d\/)/i.test(image) ? image : '';
-      host.innerHTML = safeImage ? `<div class="ml-auto mt-6 w-full max-w-xs text-center text-slate-900 break-inside-avoid"><p class="text-xs mb-2">Dibuat dan dilaksanakan oleh,</p><p class="text-sm font-bold">Pelaksana Proyek</p><img src="${safeImage}" alt="Tanda tangan Pelaksana Proyek" class="mx-auto my-2 object-contain" style="width:220px;height:85px"/><p class="text-sm font-bold underline">${escapeHtml(data.name)}</p><p class="text-[10px] text-slate-500">Pelaksana Proyek</p></div>` : '<p class="mt-8 text-right text-xs text-slate-500">Gambar tanda tangan tidak valid.</p>';
-    }
-
     function escapeHtml(value) { return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
 
     function renderLaporan() {
@@ -2010,7 +1931,6 @@
       }
       document.getElementById('laporan-dynamic-content').innerHTML = html;
       renderManagerSignatureReport();
-      renderPelaksanaSignatureReport();
     }
 
     function applyPaperClass(wrapperId, paperClass) {
